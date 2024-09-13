@@ -1,0 +1,21 @@
+{
+  "name": "bringle-youtube-bot",
+  "version": "0.0.0",
+  "description": "A Discord bot used to send notifications when specified YouTube channels go live.",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "seaturtle7389",
+  "license": "",
+  "dependencies": {
+    "discord.js": "^14.16.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.17.1",
+    "node-fetch": "^2.6.1",
+    "rss-parser": "^3.7.5",
+    "sequelize": "^6.37.3",
+    "sqlite3": "^5.1.7"
+  }
+}

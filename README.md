@@ -1,2 +1,2 @@
 # bringle-youtube-bot
-A Discord bot used to send notifications when specified YouTube channels go live. Built using brandonshreve's yt-live-to-discord, with snippets from twlite's youtube-notification-bot. Additional code developed using discord.js tutorials.
+A Discord bot used to send notifications when specified YouTube channels go live. Built using [brandonshreve](https://github.com/brandonshreve)'s [yt-live-to-discord](https://github.com/brandonshreve/yt-live-to-discord) and [twlite](https://github.com/twlite)'s [youtube-notification-bot](https://github.com/twlite/youtube-notification-bot). Other basic code provided from the [official discord.js guide](https://discordjs.guide/#before-you-begin).
