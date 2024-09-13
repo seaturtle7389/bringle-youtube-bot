@@ -1,5 +1,5 @@
 async function createServerGuildIfNotExists(client, guildId) {
-    const serverGuild = client.ServerGuild
+    const ServerGuild = client.ServerGuild
     var  clientGuild = await ServerGuild.findOne({where: {id: guildId}});
     if (!clientGuild) {
         try{

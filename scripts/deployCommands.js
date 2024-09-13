@@ -1,16 +1,15 @@
-require('dotenv').config();
+const path = require('node:path');
+const fs = require('node:fs');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const { REST, Routes } = require('discord.js');
 const token = process.env.DISCORD_TOKEN;
 const clientId = process.env.DISCORD_CLIENT_ID;
 const guildId = process.env.DISCORD_DEV_GUILD_ID;
 
-const fs = require('node:fs');
-const path = require('node:path');
-
 const commands = [];
 // Grab all command folders from the commands directory
-const foldersPath = path.join(__dirname, 'commands');
+const foldersPath = path.join(__dirname, '../commands');
 const commandFolders = fs.readdirSync(foldersPath);
 
 for (const folder of commandFolders) {
@@ -35,27 +34,28 @@ const rest = new REST().setToken(token);
 // and deploy your commands!
 (async () => {
 	try {
-		console.log(`Started refreshing ${commands.length} application (/) commands.`);
-
 		// when running this file, pass the --global argument to push commands to all servers the bot is in
 		// otherwise, it will assume you should only deploy commands to the dev server specified in .env
 		const global = process.argv.includes('--global') || process.argv.includes('-f');
 
+		var data = null
 		if(global){
-			// =fully refresh all commands in all guilds
-			const data = await rest.put(
+			// fully refresh all commands in all guilds
+			console.log(`Started refreshing ${commands.length} application (/) command(s) globally.`);
+			data = await rest.put(
 				Routes.applicationCommands(clientId),
 				{ body: commands },
 			);
 		} else {
 			// fully refresh all commands in the dev guild
-			const data = await rest.put(
+			console.log(`Started refreshing ${commands.length} application (/) command(s) in the dev guild.`);
+			data = await rest.put(
 				Routes.applicationGuildCommands(clientId, guildId),
 				{ body: commands },
 			);
 		}
 
-		console.log(`Successfully reloaded ${data.length} application (/) commands.`);
+		console.log(`Successfully reloaded ${data.length} application (/) command(s).`);
 	} catch (error) {
 		// And of course, make sure you catch and log any errors!
 		console.error(error);

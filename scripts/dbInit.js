@@ -1,4 +1,7 @@
+require('dotenv').config();
 const Sequelize = require('sequelize');
+const databaseUser = process.env.DATABASE_USER;
+const databasePassword = process.env.DATABASE_PASSWORD;
 
 // set up database and import models
 const sequelize = new Sequelize('youtube-bot', databaseUser, databasePassword, {
@@ -9,8 +12,8 @@ const sequelize = new Sequelize('youtube-bot', databaseUser, databasePassword, {
 	storage: 'database.sqlite',
 });
 
-require('../models/Guilds.js')(sequelize, Sequelize.DataTypes)
-require('../models/YoutubeChannels.js')(sequelize, Sequelize.DataTypes)
+require('../models/Guild.js')(sequelize, Sequelize.DataTypes)
+require('../models/YoutubeChannel.js')(sequelize, Sequelize.DataTypes)
 
 // when running this file, pass the --force argument to force sync and rebuild all tables
 const force = process.argv.includes('--force') || process.argv.includes('-f');

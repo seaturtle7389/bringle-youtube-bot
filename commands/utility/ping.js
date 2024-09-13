@@ -8,8 +8,8 @@ module.exports = {
 		//.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
 		.setContexts([0]),
 	async execute(interaction) {
-		const init = require('../../main.js')
-		await init.createServerGuildIfNotExists(interaction.client, interaction.guild.id);
+		const guildHelper = require('../../helpers/serverGuildHelpers')
+		await guildHelper.createServerGuildIfNotExists(interaction.client, interaction.guild.id);
 		await interaction.reply('Pong!');
 	},
 };
