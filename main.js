@@ -1,35 +1,27 @@
 require('dotenv').config();
-const Sequelize = require('sequelize');
+const discordToken = process.env.DISCORD_TOKEN;
+//const youtubeApiKey = process.env.YOUTUBE_API_KEY;
+//const youtubeApiUrl = 'https://www.googleapis.com/youtube/v3/search?part=snippet&eventType=live&type=video';
+
 const fs = require('node:fs');
 const path = require('node:path');
-const fetch = require("node-fetch");
-const express = require('express')
-const { Client, Collection, /*Events,*/ GatewayIntentBits } = require('discord.js');
+//const fetch = require("node-fetch");
+//const express = require('express')
 
-const youtubeApiKey = process.env.YOUTUBE_API_KEY;
-const youtubeApiUrl = 'https://www.googleapis.com/youtube/v3/search?part=snippet&eventType=live&type=video';
-const discordToken = process.env.DISCORD_TOKEN;
-const databaseUser = process.env.DATABASE_USER;
-const databasePassword = process.env.DATABASE_PASSWORD;
+// import database models
+const {ServerGuild, YoutubeChannel } = require('./dbObjects.js')
 
-const app = express();
-const port = process.env.PORT || 3000;
-const youtubeFetchTimeout = 5000;
+//const app = express();
+//const port = process.env.PORT || 3000;
+//const youtubeFetchTimeout = 5000;
 
+const { Client, Collection, GatewayIntentBits } = require('discord.js');
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-client.request = new (require("rss-parser"))();
-
-// set up database and import models
-const sequelize = new Sequelize('youtube-bot', databaseUser, databasePassword, {
-	host: 'localhost',
-	dialect: 'sqlite',
-	logging: false,
-	// SQLite only
-	storage: 'database.sqlite',
-});
-const ServerGuilds = require(path.join(__dirname, "models/guild.js"))(sequelize, Sequelize.DataTypes)
-client.ServerGuilds = ServerGuilds
+// attach these to client so they're accessible in events and commands
+client.ServerGuild = ServerGuild
+client.YoutubeChannels = YoutubeChannel
+//client.request = new (require("rss-parser"))();
 
 //import commands from the commands directory s
 client.commands = new Collection();
@@ -63,43 +55,9 @@ for (const file of eventFiles) {
 	}
 }
 
-async function createServerGuildIfNotExists(client, guildId) {
-    const serverGuilds = client.ServerGuilds
-    const serverGuild = await ServerGuilds.findOne({where: {id: guildId}});
-    if (!serverGuild) {
-        try{
-            const newServerGuild = await ServerGuilds.create({
-                id: guildId
-            })
-            console.log("Guild was added")
-        }
-        catch (error) {
-            if (error.name === 'SequelizeUniqueConstraintError'){
-                console.log("Guild already exists")
-            } else {
-                console.log("Something went wrong when adding a guild")
-            }
-        }  
-    } else {
-        console.log("Guild has already been added")
-    }
-}
-
-// export these functions to other files as needed
-module.exports = {
-    createServerGuildIfNotExists
-}
-
 client.login(discordToken);
 
-/*const youtubeChannels = [
-    {
-        channelId: 'UCOykvWPPCoxvY0p-KPrQqSQ',
-        channelUrl: 'https://www.youtube.com/channel/UCOykvWPPCoxvY0p-KPrQqSQ'
-    }
-];
-
-let activeLiveStreams = new Set();
+/*let activeLiveStreams = new Set();
 
 async function fetchLiveStreamStatus() {
     try {

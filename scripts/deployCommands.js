@@ -9,12 +9,12 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const commands = [];
-// Grab all the command folders from the commands directory you created earlier
+// Grab all command folders from the commands directory
 const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
 
 for (const folder of commandFolders) {
-	// Grab all the command files from the commands directory you created earlier
+	// command files from the commands directory 
 	const commandsPath = path.join(foldersPath, folder);
 	const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 	// Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
@@ -37,11 +37,23 @@ const rest = new REST().setToken(token);
 	try {
 		console.log(`Started refreshing ${commands.length} application (/) commands.`);
 
-		// The put method is used to fully refresh all commands in the guild with the current set
-		const data = await rest.put(
-			Routes.applicationGuildCommands(clientId, guildId),
-			{ body: commands },
-		);
+		// when running this file, pass the --global argument to push commands to all servers the bot is in
+		// otherwise, it will assume you should only deploy commands to the dev server specified in .env
+		const global = process.argv.includes('--global') || process.argv.includes('-f');
+
+		if(global){
+			// =fully refresh all commands in all guilds
+			const data = await rest.put(
+				Routes.applicationCommands(clientId),
+				{ body: commands },
+			);
+		} else {
+			// fully refresh all commands in the dev guild
+			const data = await rest.put(
+				Routes.applicationGuildCommands(clientId, guildId),
+				{ body: commands },
+			);
+		}
 
 		console.log(`Successfully reloaded ${data.length} application (/) commands.`);
 	} catch (error) {
