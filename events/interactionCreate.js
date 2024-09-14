@@ -25,12 +25,17 @@ module.exports = {
         
         if (timestamps.has(interaction.user.id)) {
             const expirationTime = timestamps.get(interaction.user.id) + cooldownAmount;
-            if (now < expirationTime) {
+			var time_remaining = expirationTime - now;
+            if (time_remaining > 0) {
                 const expiredTimestamp = Math.round(expirationTime / 1_000);
-                return interaction.reply({ content: `Please wait, you are on a cooldown for \`${command.data.name}\`. You can use it again <t:${expiredTimestamp}:R>.`, ephemeral: true });
+                await interaction.reply({ content: `Please wait, you are on a cooldown for \`${command.data.name}\`. You can use it again <t:${expiredTimestamp}:R>.`, ephemeral: true });
+				setTimeout(async function(){
+					await interaction.deleteReply();
+				}, time_remaining);
+				return;
             }
         }
-
+		
         timestamps.set(interaction.user.id, now);
         setTimeout(() => timestamps.delete(interaction.user.id), cooldownAmount);
 

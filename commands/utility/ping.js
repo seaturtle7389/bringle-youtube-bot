@@ -5,11 +5,11 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('ping')
 		.setDescription('Replies with Pong!')
-		//.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
+		.setDefaultMemberPermissions(PermissionFlagsBits.SendMessages)
 		.setContexts([0]),
 	async execute(interaction) {
-		const guildHelper = require('../../helpers/serverGuildHelpers')
-		await guildHelper.createServerGuildIfNotExists(interaction.client, interaction.guild.id);
-		await interaction.reply('Pong!');
+		//const guildHelper = require('../../helpers/serverGuildHelpers')
+		//await guildHelper.createServerGuildIfNotExists(interaction.client, interaction.guild.id);
+		await interaction.reply({content: 'Pong!', ephemeral: true });
 	},
 };

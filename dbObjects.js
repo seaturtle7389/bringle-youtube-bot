@@ -14,12 +14,15 @@ const sequelize = new Sequelize('youtube-bot', databaseUser, databasePassword, {
 const ServerGuild = require('./models/Guild.js')(sequelize, Sequelize.DataTypes)
 const YoutubeChannel = require('./models/YoutubeChannel.js')(sequelize, Sequelize.DataTypes)
 
-ServerGuild.hasMany(YoutubeChannel, {
-	foreignKey: {
-		allowNull: false
-	}
+/*ServerGuild.hasMany(YoutubeChannel, {
+	onDelete: 'CASCADE'
 })
 
-YoutubeChannel.belongsTo(ServerGuild);
+YoutubeChannel.belongsTo(ServerGuild, {
+	foreignKey: {
+		name: 'guild_id',
+		allowNull: false
+	},
+});*/
 
 module.exports = {ServerGuild, YoutubeChannel}

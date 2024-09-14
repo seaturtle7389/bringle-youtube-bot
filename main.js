@@ -20,7 +20,7 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 // attach these to client so they're accessible in events and commands
 client.ServerGuild = ServerGuild
-client.YoutubeChannels = YoutubeChannel
+client.YoutubeChannel = YoutubeChannel
 //client.request = new (require("rss-parser"))();
 
 //import commands from the commands directory s
