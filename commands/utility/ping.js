@@ -8,8 +8,6 @@ module.exports = {
 		.setDefaultMemberPermissions(PermissionFlagsBits.SendMessages)
 		.setContexts([0]),
 	async execute(interaction) {
-		//const guildHelper = require('../../helpers/serverGuildHelpers')
-		//await guildHelper.createServerGuildIfNotExists(interaction.client, interaction.guild.id);
 		await interaction.reply({content: 'Pong!', ephemeral: true });
 	},
 };

@@ -20,6 +20,22 @@ async function createServerGuildIfNotExists(client, guildId) {
     }
 }
 
+async function deleteServerGuild(client, guildId) {
+    const ServerGuild = client.ServerGuild
+    var  clientGuild = await ServerGuild.findOne({where: {id: guildId}});
+    if (clientGuild) {
+        try{
+            clientGuild.destroy();
+            console.log("Guild was deleted")
+        }
+        catch (error) {  
+            console.log(`Something went wrong when deleting guild ${guildId}`)
+        }  
+    } else {
+        console.log("Guild does not exist")
+    }
+}
+
 module.exports = {
-    createServerGuildIfNotExists
+    createServerGuildIfNotExists, deleteServerGuild
 }

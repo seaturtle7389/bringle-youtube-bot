@@ -41,9 +41,6 @@ module.exports = {
 		const upload_notif_channel_id = upload_notif_channel ? upload_notif_channel.id : null;
 		const guild = interaction.guild;
 		const YoutubeChannel = interaction.client.YoutubeChannel
-
-		const guildHelper = require('../../helpers/serverGuildHelpers')
-		await guildHelper.createServerGuildIfNotExists(interaction.client, guild.id);
 		
 		// you must supply at least one channel or there's no point in adding it lol
 		if(live_notif_channel || upload_notif_channel){
