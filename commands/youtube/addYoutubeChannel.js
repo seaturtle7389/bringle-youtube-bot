@@ -1,5 +1,6 @@
-const { SlashCommandBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, ChannelType, EmbedBuilder } = require('discord.js');
 const YoutubeChannel = require('../../models/YoutubeChannel');
+const youtubeChannelHelper = require('../../helpers/youtubeChannelHelper')
 
 module.exports = {
 	cooldown: 5,
@@ -48,7 +49,6 @@ module.exports = {
 			await interaction.deferReply();
 
 			// make sure the channel exists before we add it to the database
-			const youtubeChannelHelper = require('../../helpers/youtubeChannelHelper')
 			channel_exists = await youtubeChannelHelper.validateYoutubeChannelId(yt_channel_id);
 			if(!channel_exists){
 				await interaction.followUp(`**YouTube channel with the ID ${yt_channel_id} does not exist.**`);
@@ -57,46 +57,38 @@ module.exports = {
 
 			var  existingYoutubeChannel = await YoutubeChannel.findOne({where: {guild_id: guild.id, youtube_channel_id: yt_channel_id}});
     		if (!existingYoutubeChannel) {
-				try{
-					
-					const newYoutubeChannel = await YoutubeChannel.create({
-						name: nickname,
-						guild_id: guild.id,
-						youtube_channel_id: yt_channel_id,
-						upload_channel_id: upload_notif_channel_id,
-						notification_channel_id: live_notif_channel_id
-					})
-					console.log("Youtube channel was added")
+				const newYoutubeChannel = youtubeChannelHelper.createYoutubeChannel(interaction.client, nickname, guild.id, yt_channel_id, upload_notif_channel_id, live_notif_channel_id)
+				if (newYoutubeChannel){
 					await interaction.followUp(`**YouTube channel "${newYoutubeChannel.name}" was added!**`);
-				}
-				catch (error) {
-					if (error.name === 'SequelizeUniqueConstraintError'){
-						console.log("YouTube channel already exists")
-					} else {
-						console.log(`Something went wrong when adding YouTube channel "${nickname}"`)
-						console.error(error)
-					}
+				} else {
 					await interaction.followUp(`**YouTube channel "${nickname}" was not added due to an unexpected error.**`);
-				}  
+				}
 			} else {
 				oldName = existingYoutubeChannel.name;
 				oldUploadChannelId = existingYoutubeChannel.upload_channel_id;
 				oldNotificationChannelId = existingYoutubeChannel.notification_channel_id;
-				await interaction.followUp(`**This YouTube channel already exists as ${oldName}.** The existing channel will be updated with the new name and notification channels.`);
 				existingYoutubeChannel = await existingYoutubeChannel.update({
 					name: nickname,
 					upload_channel_id: upload_notif_channel_id,
 					notification_channel_id: live_notif_channel_id
 				})
 				responseString = '**The YouTube channel was updated!**\n'
+				var changed = false;
 				if(oldName != existingYoutubeChannel.name){
 					responseString += `Channel name: ${oldName} -> ${existingYoutubeChannel.name}\n`;
+					changed = true;
 				}
 				if(oldUploadChannelId != existingYoutubeChannel.upload_channel_id){
 					responseString += `Upload channel ID: ${oldUploadChannelId} -> ${existingYoutubeChannel.upload_channel_id}\n`;
+					changed = true;
 				}
 				if(oldNotificationChannelId != existingYoutubeChannel.notification_channel_id){
 					responseString += `Livestream channel ID: ${oldNotificationChannelId} -> ${existingYoutubeChannel.notification_channel_id}`;
+					changed = true;
+				}
+				// overwrite the message if nothing was changed
+				if (!changed){
+					responseString = '**A YouTube channel already exists with this exact same information.** Did you mean to run this command?'
 				}
 				await interaction.followUp(responseString.replace(/^\s+|\s+$/g, ""));
 			}

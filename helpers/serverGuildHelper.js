@@ -1,4 +1,4 @@
-async function createServerGuildIfNotExists(client, guildId) {
+async function createServerGuild(client, guildId) {
     const ServerGuild = client.ServerGuild
     var  clientGuild = await ServerGuild.findOne({where: {id: guildId}});
     if (!clientGuild) {
@@ -37,5 +37,5 @@ async function deleteServerGuild(client, guildId) {
 }
 
 module.exports = {
-    createServerGuildIfNotExists, deleteServerGuild
+    createServerGuild, deleteServerGuild
 }
