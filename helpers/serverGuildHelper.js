@@ -1,9 +1,9 @@
 async function createServerGuild(client, guildId) {
-    const ServerGuild = client.ServerGuild
+    var ServerGuild = client.ServerGuild
     var  clientGuild = await ServerGuild.findOne({where: {id: guildId}});
     if (!clientGuild) {
         try{
-            const newServerGuild = await ServerGuild.create({
+            var newServerGuild = await ServerGuild.create({
                 id: guildId
             })
             console.log("Guild was added")
@@ -21,7 +21,7 @@ async function createServerGuild(client, guildId) {
 }
 
 async function deleteServerGuild(client, guildId) {
-    const ServerGuild = client.ServerGuild
+    var ServerGuild = client.ServerGuild
     var  clientGuild = await ServerGuild.findOne({where: {id: guildId}});
     if (clientGuild) {
         try{

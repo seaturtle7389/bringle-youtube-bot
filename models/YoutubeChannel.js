@@ -19,6 +19,6 @@ module.exports = function(sequelize, DataTypes){
             allowNull: false
         },
         upload_channel_id: Sequelize.STRING,
-        notification_channel_id: Sequelize.STRING,
+        livestream_channel_id: Sequelize.STRING,
     })
 }

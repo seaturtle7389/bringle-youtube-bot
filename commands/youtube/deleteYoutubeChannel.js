@@ -19,11 +19,11 @@ module.exports = {
 		.setContexts([0]),
     async autocomplete(interaction){
         // handle the autocompletion response
-        const guild = interaction.guild;
-		const YoutubeChannel = interaction.client.YoutubeChannel
-        const focusedValue = interaction.options.getFocused();
-        const existingYoutubeChannels = await YoutubeChannel.findAll({where: {guild_id: guild.id}});
-        const filtered = existingYoutubeChannels.filter(youtubeChannel => youtubeChannel.name.startsWith(focusedValue));
+        var guild = interaction.guild;
+		var YoutubeChannel = interaction.client.YoutubeChannel
+        var focusedValue = interaction.options.getFocused();
+        var existingYoutubeChannels = await YoutubeChannel.findAll({where: {guild_id: guild.id}});
+        var filtered = existingYoutubeChannels.filter(youtubeChannel => youtubeChannel.name.startsWith(focusedValue));
 
         await interaction.respond(
             filtered.map(youtubeChannel => ({ name: youtubeChannel.name, value: youtubeChannel.id}))
@@ -31,7 +31,7 @@ module.exports = {
     },
 	async execute(interaction) {
         await interaction.deferReply();
-        const yt_channel_id = interaction.options.getInteger('yt_channel');
+        var yt_channel_id = interaction.options.getInteger('yt_channel');
         var result = await youtubeChannelHelper.deleteYoutubeChannel(interaction.client, yt_channel_id)
         if (result) {
             await interaction.followUp({content: `**Successfully deleted YouTube channel "${result}.**"`});

@@ -9,11 +9,14 @@ const path = require('node:path');
 //const express = require('express')
 
 // import database models
-const {ServerGuild, YoutubeChannel } = require('./dbObjects.js')
+const {ServerGuild, YoutubeChannel, Op } = require('./dbObjects.js')
+
+// import helper
+const youtubeChannelHelper = require('./helpers/youtubeChannelHelper');
 
 //const app = express();
 //const port = process.env.PORT || 3000;
-//const youtubeFetchTimeout = 5000;
+const youtubeFetchTimeout = 10000;
 
 const { Client, Collection, GatewayIntentBits } = require('discord.js');
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -21,7 +24,8 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 // attach these to client so they're accessible in events and commands
 client.ServerGuild = ServerGuild
 client.YoutubeChannel = YoutubeChannel
-//client.request = new (require("rss-parser"))();
+
+//let rssParser = new (require("rss-parser"))();
 
 //import commands from the commands directory s
 client.commands = new Collection();
@@ -57,16 +61,60 @@ for (const file of eventFiles) {
 
 client.login(discordToken);
 
+setInterval(fetchLatestYoutubeVideos, youtubeFetchTimeout);
+
+async function fetchYoutubeVideos(){
+    guilds = await ServerGuild.findAll();
+    for (g of guilds) {
+        var youtubeChannels = await YoutubeChannel.findAll({where: {guild_id: g.id,livestream_channel_id: {[Op.not]: null}}})
+        for (yt of youtubeChannels) {
+            videoDetails = await youtubeChannelHelper.fetchAllYoutubeChannelVideos(yt.youtube_channel_id);
+            console.log(yt.name);
+            console.log(videoDetails);
+        };
+    }; 
+}
+
+async function fetchLatestYoutubeVideos(){
+    guilds = await ServerGuild.findAll();
+    for (g of guilds) {
+        var youtubeChannels = await YoutubeChannel.findAll({where: {guild_id: g.id}})
+        for (yt of youtubeChannels) {
+            if(yt.livestream_channel_id != null || yt.upload_channel_id != null){
+                var videoDetails = await youtubeChannelHelper.fetchLatestYoutubeChannelVideos(yt.youtube_channel_id);
+                console.log(yt.name);
+                for(video of videoDetails){
+                    if(video.liveStreamingDetails != null){
+                        // this video is a livestream, make sure we send livestream notifs for this Youtube channel
+                        if(yt.livestream_channel_id != null){
+                            var channel = client.channels.cache.get(yt.livestream_channel_id);
+                            var message = `New livestream from ${yt.name}`
+                            await channel.send(message);
+                        }
+                    } else {
+                        if(yt.upload_channel_id != null){
+                            var channel = client.channels.cache.get(yt.upload_channel_id);
+                            var message = `New upload from ${yt.name}`
+                            await channel.send(message);
+                        }
+                    }
+                }
+            }
+            
+        };
+    }; 
+}
+
 /*let activeLiveStreams = new Set();
 
 async function fetchLiveStreamStatus() {
     try {
-        // for(const youtubeChannel of youtubeChannels) {
-            const youtubeChannel = youtubeChannels[0];
+        // for(var youtubeChannel of youtubeChannels) {
+            var youtubeChannel = youtubeChannels[0];
             console.log('Polling for ', JSON.stringify(youtubeChannel));
-            const url = `${youtubeApiUrl}&channelId=${youtubeChannel.channelId}&key=${youtubeApiKey}`;
-            const response = await fetch(url);
-            const myJson = await response.json();
+            var url = `${youtubeApiUrl}&channelId=${youtubeChannel.channelId}&key=${youtubeApiKey}`;
+            var response = await fetch(url);
+            var myJson = await response.json();
             
             console.log('YouTube Response', JSON.stringify(myJson));
             if(myJson && myJson.pageInfo && myJson.pageInfo.totalResults > 0) {
@@ -76,7 +124,7 @@ async function fetchLiveStreamStatus() {
                         console.log(element);
                         activeLiveStreams.add(element.id.videoId);
     
-                        const discordObj = {
+                        var discordObj = {
                             username: 'Dumpster LIVE',
                             avatar_url: 'https://yt3.ggpht.com/a/AGF-l7__zvPRgglwpeA85-NPjkxRlhi46IG3wKdwKg=s288-c-k-c0xffffffff-no-rj-mo',
                             content: `Richlife is LIVE. **${element.snippet.title}**. Channel: ${youtubeChannel.channelUrl}`
@@ -87,7 +135,7 @@ async function fetchLiveStreamStatus() {
                     }
                 });
             } else {
-                const discordObj = {
+                var discordObj = {
                     username: 'No one is live :(',
                     avatar_url: 'https://yt3.ggpht.com/a/AGF-l7__zvPRgglwpeA85-NPjkxRlhi46IG3wKdwKg=s288-c-k-c0xffffffff-no-rj-mo',
                     content: `Richlife is NOT LIVE.`

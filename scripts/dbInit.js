@@ -9,7 +9,7 @@ const sequelize = new Sequelize('youtube-bot', databaseUser, databasePassword, {
 	dialect: 'sqlite',
 	logging: false,
 	// SQLite only
-	storage: 'database.sqlite',
+	storage: '../database.sqlite',
 });
 
 require('../models/Guild.js')(sequelize, Sequelize.DataTypes)

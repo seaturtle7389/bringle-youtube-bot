@@ -34,14 +34,14 @@ module.exports = {
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
 		.setContexts([0]),
 	async execute(interaction) {
-		const yt_channel_id = interaction.options.getString('yt_channel_id');
-		const nickname = interaction.options.getString('nickname');
-		const live_notif_channel = interaction.options.getChannel('live_notif_channel');
-		const live_notif_channel_id = live_notif_channel ? live_notif_channel.id : null;
-		const upload_notif_channel = interaction.options.getChannel('upload_notif_channel');
-		const upload_notif_channel_id = upload_notif_channel ? upload_notif_channel.id : null;
-		const guild = interaction.guild;
-		const YoutubeChannel = interaction.client.YoutubeChannel
+		var yt_channel_id = interaction.options.getString('yt_channel_id');
+		var nickname = interaction.options.getString('nickname');
+		var live_notif_channel = interaction.options.getChannel('live_notif_channel');
+		var live_notif_channel_id = live_notif_channel ? live_notif_channel.id : null;
+		var upload_notif_channel = interaction.options.getChannel('upload_notif_channel');
+		var upload_notif_channel_id = upload_notif_channel ? upload_notif_channel.id : null;
+		var guild = interaction.guild;
+		var YoutubeChannel = interaction.client.YoutubeChannel
 		
 		// you must supply at least one channel or there's no point in adding it lol
 		if(live_notif_channel || upload_notif_channel){
@@ -57,7 +57,7 @@ module.exports = {
 
 			var  existingYoutubeChannel = await YoutubeChannel.findOne({where: {guild_id: guild.id, youtube_channel_id: yt_channel_id}});
     		if (!existingYoutubeChannel) {
-				const newYoutubeChannel = youtubeChannelHelper.createYoutubeChannel(interaction.client, nickname, guild.id, yt_channel_id, upload_notif_channel_id, live_notif_channel_id)
+				var newYoutubeChannel = await youtubeChannelHelper.createYoutubeChannel(interaction.client, nickname, guild.id, yt_channel_id, upload_notif_channel_id, live_notif_channel_id)
 				if (newYoutubeChannel){
 					await interaction.followUp(`**YouTube channel "${newYoutubeChannel.name}" was added!**`);
 				} else {
@@ -66,11 +66,11 @@ module.exports = {
 			} else {
 				oldName = existingYoutubeChannel.name;
 				oldUploadChannelId = existingYoutubeChannel.upload_channel_id;
-				oldNotificationChannelId = existingYoutubeChannel.notification_channel_id;
+				oldNotificationChannelId = existingYoutubeChannel.livestream_channel_id;
 				existingYoutubeChannel = await existingYoutubeChannel.update({
 					name: nickname,
 					upload_channel_id: upload_notif_channel_id,
-					notification_channel_id: live_notif_channel_id
+					livestream_channel_id: live_notif_channel_id
 				})
 				responseString = '**The YouTube channel was updated!**\n'
 				var changed = false;
@@ -82,8 +82,8 @@ module.exports = {
 					responseString += `Upload channel ID: ${oldUploadChannelId} -> ${existingYoutubeChannel.upload_channel_id}\n`;
 					changed = true;
 				}
-				if(oldNotificationChannelId != existingYoutubeChannel.notification_channel_id){
-					responseString += `Livestream channel ID: ${oldNotificationChannelId} -> ${existingYoutubeChannel.notification_channel_id}`;
+				if(oldNotificationChannelId != existingYoutubeChannel.livestream_channel_id){
+					responseString += `Livestream channel ID: ${oldNotificationChannelId} -> ${existingYoutubeChannel.livestream_channel_id}`;
 					changed = true;
 				}
 				// overwrite the message if nothing was changed

@@ -13,18 +13,19 @@ module.exports = {
 		.setContexts([0]),
 	async execute(interaction) {
         await interaction.deferReply();
-        const guild = interaction.guild;
-		const YoutubeChannel = interaction.client.YoutubeChannel
+        var guild = interaction.guild;
+		var YoutubeChannel = interaction.client.YoutubeChannel
 
-        const youtubeChannels = await YoutubeChannel.findAll({where: {guild_id: guild.id}});
-        const youtubeChannelIds = youtubeChannels.map(youtubeChannel => youtubeChannel.youtube_channel_id)
-        const response = await youtubeChannelHelper.fetchYoutubeChannelsDetails(youtubeChannelIds);
+        var youtubeChannels = await YoutubeChannel.findAll({where: {guild_id: guild.id}});
+        var youtubeChannelIds = youtubeChannels.map(youtubeChannel => youtubeChannel.youtube_channel_id)
+        var response = await youtubeChannelHelper.fetchYoutubeChannelsDetails(youtubeChannelIds);
         if (response && response.items){
-            channelDetails = response.items;
+            const channelDetails = response.items;
+            console.log(channelDetails);
             var index = 0;
             var color = randomColor();
-            const channel = await youtubeChannels.find((youtubeChannel) => youtubeChannel.youtube_channel_id == channelDetails[index].id)
-            const channelDetailsEmbed = new EmbedBuilder()
+            var channel = await youtubeChannels.find((youtubeChannel) => youtubeChannel.youtube_channel_id == channelDetails[index].id)
+            var channelDetailsEmbed = new EmbedBuilder()
                 .setTitle(`${channelDetails[index].snippet.title} (${channelDetails[index].snippet.customUrl})`)
                 .setURL(`https://youtube.com/${channelDetails[index].snippet.customUrl}`)
                 .setDescription(channelDetails[index].snippet.description)
@@ -36,14 +37,14 @@ module.exports = {
                     {name: 'Nickname', value: channel.name},
                     {name: 'YouTube channel ID', value: `\`${channel.youtube_channel_id}\``, inline: true},
                     {name: 'Upload notification channel', value: channel.upload_channel_id ? `<#${channel.upload_channel_id}>` : "N/A"},
-                    {name: 'Livestream notification channel', value: channel.notification_channel_id ? `<#${channel.notification_channel_id}>` : "N/A"},
+                    {name: 'Livestream notification channel', value: channel.livestream_channel_id ? `<#${channel.livestream_channel_id}>` : "N/A"},
                 )
                 .setFooter({text: `Viewing channel ${index + 1} of ${channelDetails.length}`})
                 .setTimestamp()
 
             // if there's only one channel, you shouldn't be able to press the forward button
             var forwardButtonDisabled = (channelDetails.length == 1)
-            const forwardButton = new ButtonBuilder()
+            var forwardButton = new ButtonBuilder()
                 .setCustomId('forward')
                 .setLabel('Next')
                 .setStyle(ButtonStyle.Secondary)
@@ -51,23 +52,23 @@ module.exports = {
 
             // backwards button should always be disabled to start
             var backwardButtonDisabled = true;
-            const backwardButton = new ButtonBuilder()
+            var backwardButton = new ButtonBuilder()
                 .setCustomId('backward')
                 .setLabel('Previous')
                 .setStyle(ButtonStyle.Secondary)
                 .setDisabled(backwardButtonDisabled)
 
-            const cancelButton = new ButtonBuilder()
+            var cancelButton = new ButtonBuilder()
                 .setCustomId('cancel')
                 .setLabel('Cancel')
                 .setStyle(ButtonStyle.Danger)
 
-            const row = new ActionRowBuilder()
+            var row = new ActionRowBuilder()
                 .addComponents(backwardButton, forwardButton, cancelButton)
 
-            const embedResponse = await interaction.followUp({embeds: [channelDetailsEmbed], components: [row]});
-            const collectorFilter = i => i.user.id === interaction.user.id;
-            const collector = embedResponse.createMessageComponentCollector({ filter: collectorFilter, componentType: ComponentType.Button, idle: 60_000});
+            var embedResponse = await interaction.followUp({embeds: [channelDetailsEmbed], components: [row]});
+            var collectorFilter = i => i.user.id === interaction.user.id;
+            var collector = embedResponse.createMessageComponentCollector({ filter: collectorFilter, componentType: ComponentType.Button, idle: 60_000});
 
             collector.on('collect', async buttonInteraction => {
                 var value = buttonInteraction.customId;
@@ -84,16 +85,17 @@ module.exports = {
                 } else if (value == 'backward'){
                     index--;
                 }
-
-                // failsafes in case somehow people press buttons they shouldn't be able to....
+                console.log(index);
+                console.log(channelDetails);
+                //failsafes in case somehow people press buttons they shouldn't be able to....
                 if(index < 0) {
                     index = 0;
                 } else if (index > channelDetails.length - 1) {
                     index = channelDetails.length - 1
                 }
 
-                const updatedChannel = await youtubeChannels.find((youtubeChannel) => youtubeChannel.youtube_channel_id == channelDetails[index].id)
-                const updatedChannelDetailsEmbed = new EmbedBuilder()
+                var updatedChannel = await youtubeChannels.find((youtubeChannel) => youtubeChannel.youtube_channel_id == channelDetails[index].id)
+                var updatedChannelDetailsEmbed = new EmbedBuilder()
                     .setTitle(`${channelDetails[index].snippet.title} (${channelDetails[index].snippet.customUrl})`)
                     .setURL(`https://youtube.com/${channelDetails[index].snippet.customUrl}`)
                     .setDescription(channelDetails[index].snippet.description)
@@ -105,7 +107,7 @@ module.exports = {
                         {name: 'Nickname', value: updatedChannel.name},
                         {name: 'YouTube channel ID', value: `\`${updatedChannel.youtube_channel_id}\``, inline: true},
                         {name: 'Upload notification channel', value: updatedChannel.upload_channel_id ? `<#${updatedChannel.upload_channel_id}>` : 'N/A'},
-                        {name: 'Livestream notification channel', value: updatedChannel.notification_channel_id ? `<#${updatedChannel.notification_channel_id}>` : 'N/A'},
+                        {name: 'Livestream notification channel', value: updatedChannel.livestream_channel_id ? `<#${updatedChannel.livestream_channel_id}>` : 'N/A'},
                     )
                     .setFooter({text: `Viewing channel ${index + 1} of ${channelDetails.length}`})
                     .setTimestamp()
@@ -113,25 +115,25 @@ module.exports = {
                 // adjust the buttons disable state if necessary
                 backwardButtonDisabled = (index == 0);
                 forwardButtonDisabled = (index == channelDetails.length - 1)
-                const updatedForwardButton = ButtonBuilder.from(forwardButton).setDisabled(forwardButtonDisabled);  
-                const updatedbackwardButton = ButtonBuilder.from(backwardButton).setDisabled(backwardButtonDisabled);
-                const updatedRow =  ActionRowBuilder.from(row).setComponents(updatedbackwardButton, updatedForwardButton, cancelButton);
+                var updatedForwardButton = ButtonBuilder.from(forwardButton).setDisabled(forwardButtonDisabled);  
+                var updatedbackwardButton = ButtonBuilder.from(backwardButton).setDisabled(backwardButtonDisabled);
+                var updatedRow =  ActionRowBuilder.from(row).setComponents(updatedbackwardButton, updatedForwardButton, cancelButton);
                 
                 message = buttonInteraction.message
                 await message.edit({embeds: [updatedChannelDetailsEmbed], components: [updatedRow]})
             });
             collector.on('end', async (collected, reason) => {
                 // grab the current state of reply message
-                const reply = await interaction.fetchReply();
+                var reply = await interaction.fetchReply();
 
                 // update embed color to default
-                const updatedEmbed = EmbedBuilder.from(reply.embeds[0]).setColor(null);
+                var updatedEmbed = EmbedBuilder.from(reply.embeds[0]).setColor(null);
                 
                 // disable all buttons
-                const updatedForwardButton = ButtonBuilder.from(forwardButton).setDisabled(true);
-                const updatedbackwardButton = ButtonBuilder.from(backwardButton).setDisabled(true);
-                const updatedCancelButton = ButtonBuilder.from(cancelButton).setDisabled(true);
-                const updatedRow =  ActionRowBuilder.from(row).setComponents(updatedbackwardButton, updatedForwardButton, updatedCancelButton);
+                var updatedForwardButton = ButtonBuilder.from(forwardButton).setDisabled(true);
+                var updatedbackwardButton = ButtonBuilder.from(backwardButton).setDisabled(true);
+                var updatedCancelButton = ButtonBuilder.from(cancelButton).setDisabled(true);
+                var updatedRow =  ActionRowBuilder.from(row).setComponents(updatedbackwardButton, updatedForwardButton, updatedCancelButton);
 
                 await embedResponse.edit({
                     embeds: [updatedEmbed],

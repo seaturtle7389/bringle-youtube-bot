@@ -2,6 +2,7 @@ require('dotenv').config();
 const Sequelize = require('sequelize');
 const databaseUser = process.env.DATABASE_USER;
 const databasePassword = process.env.DATABASE_PASSWORD;
+const Op = Sequelize.Op;
 
 const sequelize = new Sequelize('youtube-bot', databaseUser, databasePassword, {
 	host: 'localhost',
@@ -14,15 +15,19 @@ const sequelize = new Sequelize('youtube-bot', databaseUser, databasePassword, {
 const ServerGuild = require('./models/Guild.js')(sequelize, Sequelize.DataTypes)
 const YoutubeChannel = require('./models/YoutubeChannel.js')(sequelize, Sequelize.DataTypes)
 
-/*ServerGuild.hasMany(YoutubeChannel, {
-	onDelete: 'CASCADE'
+ServerGuild.hasMany(YoutubeChannel, {
+	onDelete: 'CASCADE',
+	foreignKey: {
+		name: 'guild_id',
+		allowNull: false
+	}
 })
 
 YoutubeChannel.belongsTo(ServerGuild, {
 	foreignKey: {
 		name: 'guild_id',
 		allowNull: false
-	},
-});*/
+	}
+});
 
-module.exports = {ServerGuild, YoutubeChannel}
+module.exports = {ServerGuild, YoutubeChannel, Op}
