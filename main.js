@@ -22,8 +22,9 @@ const { Client, Collection, GatewayIntentBits } = require('discord.js');
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 // attach these to client so they're accessible in events and commands
-client.ServerGuild = ServerGuild
-client.YoutubeChannel = YoutubeChannel
+client.ServerGuild = ServerGuild;
+client.YoutubeChannel = YoutubeChannel;
+client.Op = Op;
 
 //let rssParser = new (require("rss-parser"))();
 
