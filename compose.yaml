@@ -1,0 +1,13 @@
+services:
+  discord:
+    volumes:
+      - ./database.sqlite:/usr/src/app/database.sqlite
+    env_file: 
+      - path: ".env"
+        required: true
+    build: .
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /code
