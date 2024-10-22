@@ -68,7 +68,7 @@ async function fetchYoutubeVideos(){
     for (g of guilds) {
         var youtubeChannels = await YoutubeChannel.findAll({where: {guild_id: g.id,livestream_channel_id: {[Op.not]: null}}})
         for (yt of youtubeChannels) {
-            videoDetails = await youtubeChannelHelper.fetchAllYoutubeChannelVideos(yt.youtube_channel_id);
+            videoDetails = await youtubeChannelHelper.fetchAllYoutubeChannelVideos(yt.youtube_id);
             console.log(yt.name);
             console.log(videoDetails);
         };
@@ -81,20 +81,35 @@ async function fetchLatestYoutubeVideos(){
         var youtubeChannels = await YoutubeChannel.findAll({where: {guild_id: g.id}})
         for (yt of youtubeChannels) {
             if(yt.livestream_channel_id != null || yt.upload_channel_id != null){
-                var videoDetails = await youtubeChannelHelper.fetchLatestYoutubeChannelVideos(yt.youtube_channel_id);
+                var videoDetails = await youtubeChannelHelper.fetchLatestYoutubeChannelVideos(yt.youtube_id);
                 console.log(yt.name);
                 for(video of videoDetails){
                     if(video.liveStreamingDetails != null){
                         // this video is a livestream, make sure we send livestream notifs for this Youtube channel
                         if(yt.livestream_channel_id != null){
                             var channel = client.channels.cache.get(yt.livestream_channel_id);
-                            var message = `New livestream from ${yt.name}`
+                            if(video.liveStreamingDetails.scheduledStartTime != null){
+                                var now = Date.now();
+                                var date = new Date(video.liveStreamingDetails.scheduledStartTime).getTime()
+                                var unix_timestamp = date / 1000
+                                if(now < date){
+                                    var message = `New scheduled livestream from ${yt.name}! Channel will go live at <t:${unix_timestamp}:f>`
+                                } else {
+                                    var message = `New scheduled livestream from ${yt.name}! Should already be live (scheduled for <t:${unix_timestamp}:f>).`
+                                }
+                                
+                                
+                            } else {
+                                var message = `New scheduled livestream from ${yt.name}`
+                            }
+
                             await channel.send(message);
                         }
                     } else {
                         if(yt.upload_channel_id != null){
+                            console.log(video);
                             var channel = client.channels.cache.get(yt.upload_channel_id);
-                            var message = `New upload from ${yt.name}`
+                            var message = await youtubeChannelHelper.getUploadNotificationString(client, yt.id, `https://youtu.be/${video.id}`, video.snippet.title);
                             await channel.send(message);
                         }
                     }

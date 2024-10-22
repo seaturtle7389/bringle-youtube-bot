@@ -17,14 +17,14 @@ module.exports = {
 		var YoutubeChannel = interaction.client.YoutubeChannel
 
         var youtubeChannels = await YoutubeChannel.findAll({where: {guild_id: guild.id}});
-        var youtubeChannelIds = youtubeChannels.map(youtubeChannel => youtubeChannel.youtube_channel_id)
+        var youtubeChannelIds = youtubeChannels.map(youtubeChannel => youtubeChannel.youtube_id)
         var response = await youtubeChannelHelper.fetchYoutubeChannelsDetails(youtubeChannelIds);
         if (response && response.items){
             const channelDetails = response.items;
             console.log(channelDetails);
             var index = 0;
             var color = randomColor();
-            var channel = await youtubeChannels.find((youtubeChannel) => youtubeChannel.youtube_channel_id == channelDetails[index].id)
+            var channel = await youtubeChannels.find((youtubeChannel) => youtubeChannel.youtube_id == channelDetails[index].id)
             var channelDetailsEmbed = new EmbedBuilder()
                 .setTitle(`${channelDetails[index].snippet.title} (${channelDetails[index].snippet.customUrl})`)
                 .setURL(`https://youtube.com/${channelDetails[index].snippet.customUrl}`)
@@ -35,7 +35,7 @@ module.exports = {
                     {name: 'Subscribers', value: `${channelDetails[index].statistics.subscriberCount}`, inline: true},
                     {name: 'Uploads', value: `[Click Here](https://youtube.com/playlist?list=${channelDetails[index].contentDetails.relatedPlaylists.uploads})`, inline: true},
                     {name: 'Nickname', value: channel.name},
-                    {name: 'YouTube channel ID', value: `\`${channel.youtube_channel_id}\``, inline: true},
+                    {name: 'YouTube channel ID', value: `\`${channel.youtube_id}\``, inline: true},
                     {name: 'Upload notification channel', value: channel.upload_channel_id ? `<#${channel.upload_channel_id}>` : "N/A"},
                     {name: 'Livestream notification channel', value: channel.livestream_channel_id ? `<#${channel.livestream_channel_id}>` : "N/A"},
                 )
@@ -87,14 +87,14 @@ module.exports = {
                 }
                 console.log(index);
                 console.log(channelDetails);
-                //failsafes in case somehow people press buttons they shouldn't be able to....
+                //failsafes in case somehow people press buttons  they shouldn't be able to....
                 if(index < 0) {
                     index = 0;
                 } else if (index > channelDetails.length - 1) {
                     index = channelDetails.length - 1
                 }
 
-                var updatedChannel = await youtubeChannels.find((youtubeChannel) => youtubeChannel.youtube_channel_id == channelDetails[index].id)
+                var updatedChannel = await youtubeChannels.find((youtubeChannel) => youtubeChannel.youtube_id == channelDetails[index].id)
                 var updatedChannelDetailsEmbed = new EmbedBuilder()
                     .setTitle(`${channelDetails[index].snippet.title} (${channelDetails[index].snippet.customUrl})`)
                     .setURL(`https://youtube.com/${channelDetails[index].snippet.customUrl}`)
@@ -105,7 +105,7 @@ module.exports = {
                         {name: 'Subscribers', value: `${channelDetails[index].statistics.subscriberCount}`, inline: true},
                         {name: 'Uploads', value: `[Click Here](https://youtube.com/playlist?list=${channelDetails[index].contentDetails.relatedPlaylists.uploads})`, inline: true},
                         {name: 'Nickname', value: updatedChannel.name},
-                        {name: 'YouTube channel ID', value: `\`${updatedChannel.youtube_channel_id}\``, inline: true},
+                        {name: 'YouTube channel ID', value: `\`${updatedChannel.youtube_id}\``, inline: true},
                         {name: 'Upload notification channel', value: updatedChannel.upload_channel_id ? `<#${updatedChannel.upload_channel_id}>` : 'N/A'},
                         {name: 'Livestream notification channel', value: updatedChannel.livestream_channel_id ? `<#${updatedChannel.livestream_channel_id}>` : 'N/A'},
                     )

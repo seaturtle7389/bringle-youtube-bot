@@ -16,11 +16,7 @@ const ServerGuild = require('./models/Guild.js')(sequelize, Sequelize.DataTypes)
 const YoutubeChannel = require('./models/YoutubeChannel.js')(sequelize, Sequelize.DataTypes)
 
 ServerGuild.hasMany(YoutubeChannel, {
-	onDelete: 'CASCADE',
-	foreignKey: {
-		name: 'guild_id',
-		allowNull: false
-	}
+	onDelete: 'CASCADE'
 })
 
 YoutubeChannel.belongsTo(ServerGuild, {
@@ -30,4 +26,4 @@ YoutubeChannel.belongsTo(ServerGuild, {
 	}
 });
 
-module.exports = {ServerGuild, YoutubeChannel, Op}
+module.exports = {sequelize, ServerGuild, YoutubeChannel, Op}

@@ -14,37 +14,37 @@ const returnChannelIdFields = ['items/id'];
 const returnChannelDetailsParts = ['id', 'snippet', 'statistics', 'contentDetails'];
 const returnChannelDetailsFields = ['items/id', 'items/snippet/title', 'items/snippet/description', 'items/snippet/customUrl', 'items/snippet/thumbnails/default/url', 'items/statistics/subscriberCount', 'items/contentDetails/relatedPlaylists/uploads'];
 
-async function validateYoutubeChannelId(channel_id) {
-    console.log(`Polling for YouTube channel with ID of ${channel_id}`);
-    url = buildYoutubeApiChannelRoute(returnChannelIdParts, returnChannelIdFields, [channel_id], 1);
+async function getYoutubeChannelIdFromHandle(handle) {
+    part = encodeURIComponent(returnChannelIdParts);
+    fields = encodeURIComponent(returnChannelIdFields);
+    encodedHandle = encodeURIComponent(handle);
+    params = `part=${part}&field=${fields}&forHandle=${encodedHandle}&key=${youtubeApiKey}`
+    url = youtubeChannelApiUrl + params;
+
     response = await fetch(url);
     myJson = await response.json();
 
-    // if something exists in this json, the YouTube channel exists
-    for (prop in myJson) {
-        if (Object.hasOwn(myJson, prop)) {
-          return true;
-        }
+    // if the ID exists in this json, the YouTube channel exists - return it
+    if(myJson.items != null && myJson.items[0].id != null){
+        return myJson.items[0].id;
     }
 
     // if we didn't find anything, the YouTube channel does not exists
-    return false;
+    return null;
 }
 
-async function createYoutubeChannel(client, name, guild_id, youtube_channel_id, upload_notif_channel_id, livestream_notif_channel_id){
+async function createYoutubeChannel(client, name, guild_id, youtube_channel_id, youtube_channel_handle){
     var YoutubeChannel = client.YoutubeChannel;
 
-    var  clientYoutubeChannel = await YoutubeChannel.findOne({where: {youtube_channel_id: youtube_channel_id}});
+    var  clientYoutubeChannel = await YoutubeChannel.findOne({where: {youtube_id: youtube_channel_id}});
     if (!clientYoutubeChannel) {
         try{
             var newYoutubeChannel = await YoutubeChannel.create({
                 name: name,
                 guild_id: guild_id,
-                youtube_channel_id: youtube_channel_id,
-                upload_channel_id: upload_notif_channel_id,
-                livestream_channel_id: livestream_notif_channel_id
+                youtube_id: youtube_channel_id,
+                youtube_handle: youtube_channel_handle,
             })
-            console.log("Youtube channel was added")
             return newYoutubeChannel;
         }
         catch (error) {
@@ -64,7 +64,6 @@ async function deleteYoutubeChannel(client, youtubeChannelId) {
     if (channel) {
         try{
             channel.destroy();
-            console.log("YouTube channel was deleted")
             return name;
         }
         catch (error) {  
@@ -145,17 +144,63 @@ async function fetchLatestYoutubeChannelVideos(youtubeChannelId){
 }
 
 async function fetchYoutubeChannelsDetails(youtubeChannelIds){
-    //console.log(`Polling for a group of YouTube channels`);
     url = buildYoutubeApiChannelRoute(returnChannelDetailsParts, returnChannelDetailsFields, youtubeChannelIds, youtubeChannelIds.length);
     response = await fetch(url);
     myJson = await response.json();
     return myJson;
 }
 
+// this function returns the text 
+async function getUploadNotificationString(client, youtubeChannelId, videoUrl, videoTitle){
+    var YoutubeChannel = client.YoutubeChannel;
+    var channel = await YoutubeChannel.findOne({where: {id: youtubeChannelId}});
+    if (channel.upload_role_id != null){
+        var role = `<@&${channel.upload_role_id}>`;
+    } else {
+        var role = ''
+    }
+    var channelName = channel.name;
+    var custom_string = channel.upload_announcement
+    var default_string = "## {channelName} just uploaded a new video! {role}\n**{videoTitle}**\n{videoUrl}"
 
+    if(custom_string != null){
+        str = custom_string;
+    } else {
+        str = default_string;
+    }
+
+    // insert role ping into {role} placeholder
+    str = str.replaceAll("{role}", role);
+    // insert channel name into {channelName} placeholder
+    str = str.replaceAll("{channelName}", channelName);
+    // insert video title into {videoTitle} placeholder
+    str = str.replaceAll("{videoTitle}", videoTitle);
+    // insert video url into {videoUrl} placeholder
+    str = str.replaceAll("{videoUrl}", videoUrl);
+    // insert linebreaks
+    str = str.replaceAll("{break}", "\n");
+
+    return str;
+}
+
+async function getHighestDefThumbnail(thumbnails){
+    if(thumbnails.maxres != null){
+        return thumbnails.maxres.url
+    } else if (thumbnails.standard != null){
+        thumbnails.standard.url
+    } else if (thumbnails.high != null){
+        thumbnails.high.url
+    } else if (thumbnails.medium != null){
+        thumbnails.medium.url
+    }else if (thumbnails.default != null){
+        thumbnails.default.url
+    }
+
+    return null
+}
 
 module.exports = {
-    validateYoutubeChannelId, createYoutubeChannel, deleteYoutubeChannel, fetchYoutubeChannelsDetails, /*fetchYoutubeChannelLivestreams,*/ fetchAllYoutubeChannelVideos, fetchLatestYoutubeChannelVideos
+    getYoutubeChannelIdFromHandle, createYoutubeChannel, deleteYoutubeChannel, fetchYoutubeChannelsDetails, /*fetchYoutubeChannelLivestreams,*/ fetchAllYoutubeChannelVideos, fetchLatestYoutubeChannelVideos, getUploadNotificationString, getHighestDefThumbnail
 }
 
 // gets the x most recent videos from a playlist
@@ -181,11 +226,11 @@ async function fetchYoutubeVideoDetails(youtubeVideoIds, maxResults, pageToken =
         }
     });
     videoIdsString = encodeURIComponent(videoIdsString)
-    url = youtubeVideoApiUrl + `part=liveStreamingDetails%2Cstatus&id=${videoIdsString}&maxResults=${maxResults}&key=${youtubeApiKey}`
+    url = youtubeVideoApiUrl + `part=snippet%2CliveStreamingDetails%2Cstatus&id=${videoIdsString}&maxResults=${maxResults}&key=${youtubeApiKey}`
     response = await fetch(url);
     myJson = await response.json();
     return myJson;
-}
+} 
 
 // read more about parameter options at https://developers.google.com/youtube/v3/docs/channels/list
 function buildYoutubeApiChannelRoute(parts, fields, ids, maxResults){

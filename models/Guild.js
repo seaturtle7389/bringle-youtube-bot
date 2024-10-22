@@ -8,5 +8,5 @@ module.exports = function(sequelize, DataTypes){
             unique: true,
             allowNull: false
         }
-    })
+    }, {underscored: true, timestamps: true},)
 }
