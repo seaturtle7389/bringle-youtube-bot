@@ -150,7 +150,7 @@ async function fetchYoutubeChannelsDetails(youtubeChannelIds){
     return myJson;
 }
 
-// this function returns the text 
+// this function returns the text used in an upload notif message
 async function getUploadNotificationString(client, youtubeChannelId, videoUrl, videoTitle){
     var YoutubeChannel = client.YoutubeChannel;
     var channel = await YoutubeChannel.findOne({where: {id: youtubeChannelId}});
@@ -162,6 +162,38 @@ async function getUploadNotificationString(client, youtubeChannelId, videoUrl, v
     var channelName = channel.name;
     var custom_string = channel.upload_announcement
     var default_string = "## {channelName} just uploaded a new video! {role}\n**{videoTitle}**\n{videoUrl}"
+
+    if(custom_string != null){
+        str = custom_string;
+    } else {
+        str = default_string;
+    }
+
+    // insert role ping into {role} placeholder
+    str = str.replaceAll("{role}", role);
+    // insert channel name into {channelName} placeholder
+    str = str.replaceAll("{channelName}", channelName);
+    // insert video title into {videoTitle} placeholder
+    str = str.replaceAll("{videoTitle}", videoTitle);
+    // insert video url into {videoUrl} placeholder
+    str = str.replaceAll("{videoUrl}", videoUrl);
+    // insert linebreaks
+    str = str.replaceAll("{break}", "\n");
+
+    return str;
+}
+
+async function getStreamNotificationString(client, youtubeChannelId, videoUrl, videoTitle){
+    var YoutubeChannel = client.YoutubeChannel;
+    var channel = await YoutubeChannel.findOne({where: {id: youtubeChannelId}});
+    if (channel.upload_role_id != null){
+        var role = `<@&${channel.upload_role_id}>`;
+    } else {
+        var role = ''
+    }
+    var channelName = channel.name;
+    var custom_string = channel.upload_announcement
+    var default_string = "## {channelName} is live! {role}\n**{videoTitle}**\n{videoUrl}"
 
     if(custom_string != null){
         str = custom_string;
@@ -200,7 +232,7 @@ async function getHighestDefThumbnail(thumbnails){
 }
 
 module.exports = {
-    getYoutubeChannelIdFromHandle, createYoutubeChannel, deleteYoutubeChannel, fetchYoutubeChannelsDetails, /*fetchYoutubeChannelLivestreams,*/ fetchAllYoutubeChannelVideos, fetchLatestYoutubeChannelVideos, getUploadNotificationString, getHighestDefThumbnail
+    getYoutubeChannelIdFromHandle, createYoutubeChannel, deleteYoutubeChannel, fetchYoutubeChannelsDetails, /*fetchYoutubeChannelLivestreams,*/ fetchAllYoutubeChannelVideos, fetchLatestYoutubeChannelVideos, getUploadNotificationString, getStreamNotificationString, getHighestDefThumbnail
 }
 
 // gets the x most recent videos from a playlist

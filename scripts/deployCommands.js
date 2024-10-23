@@ -31,21 +31,36 @@ for (const folder of commandFolders) {
 // Construct and prepare an instance of the REST module
 const rest = new REST().setToken(token);
 
-// and deploy your commands!
+
+// deploy commands
 (async () => {
 	try {
 		// when running this file, pass the --global argument to push commands to all servers the bot is in
 		// otherwise, it will assume you should only deploy commands to the dev server specified in .env
 		const global = process.argv.includes('--global') || process.argv.includes('-f');
-
+		const clear = process.argv.includes('--clear');
 		var data = null
-		if(global){
+
+		if(clear && global){
+			// clear global commands
+			console.log(`Started deleting all application (/) command(s) globally.`);
+			await rest.put(Routes.applicationCommands(clientId), { body: [] })
+				.then(() => console.log('Successfully deleted all application (/) commands.'))
+				.catch(console.error);
+		} else if (clear){
+			// clear guild-based commands
+			console.log(`Started deleting all application (/) command(s) in the dev guild.`);
+			await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: [] })
+				.then(() => console.log('Successfully deleted all application (/) commands in the dev guild.'))
+				.catch(console.error);
+		} else if (global){
 			// fully refresh all commands in all guilds
 			console.log(`Started refreshing ${commands.length} application (/) command(s) globally.`);
 			data = await rest.put(
 				Routes.applicationCommands(clientId),
 				{ body: commands },
 			);
+			console.log(`Successfully reloaded ${data.length} application (/) command(s).`);
 		} else {
 			// fully refresh all commands in the dev guild
 			console.log(`Started refreshing ${commands.length} application (/) command(s) in the dev guild.`);
@@ -53,9 +68,8 @@ const rest = new REST().setToken(token);
 				Routes.applicationGuildCommands(clientId, guildId),
 				{ body: commands },
 			);
+			console.log(`Successfully reloaded ${data.length} application (/) command(s).`);
 		}
-
-		console.log(`Successfully reloaded ${data.length} application (/) command(s).`);
 	} catch (error) {
 		// And of course, make sure you catch and log any errors!
 		console.error(error);

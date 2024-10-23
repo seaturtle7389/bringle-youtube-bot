@@ -7,7 +7,7 @@ var randomColor = require('randomcolor');
 module.exports = {
 	cooldown: 5,
 	data: new SlashCommandBuilder()
-		.setName('listyoutubechannels')
+		.setName('list-youtube-channels')
 		.setDescription('Displays all YouTube channels currently set up on the server')
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
 		.setContexts([0]),
@@ -36,8 +36,8 @@ module.exports = {
                     {name: 'Uploads', value: `[Click Here](https://youtube.com/playlist?list=${channelDetails[index].contentDetails.relatedPlaylists.uploads})`, inline: true},
                     {name: 'Nickname', value: channel.name},
                     {name: 'YouTube channel ID', value: `\`${channel.youtube_id}\``, inline: true},
-                    {name: 'Upload notification channel', value: channel.upload_channel_id ? `<#${channel.upload_channel_id}>` : "N/A"},
-                    {name: 'Livestream notification channel', value: channel.livestream_channel_id ? `<#${channel.livestream_channel_id}>` : "N/A"},
+                    {name: 'Upload notifications', value: channel.upload_channel_id ? `channel: <#${channel.upload_channel_id}> ${channel.upload_role_id ? `\nrole ping: <@&${channel.upload_role_id}>` : ""}` : "N/A"},
+                    {name: 'Livestream notifications', value: channel.livestream_channel_id ? `channel: <#${channel.livestream_channel_id}> ${channel.livestream_role_id ? `\nrole ping: <@&${channel.livestream_role_id}>` : ""}` : "N/A"},
                 )
                 .setFooter({text: `Viewing channel ${index + 1} of ${channelDetails.length}`})
                 .setTimestamp()

@@ -16,7 +16,7 @@ const youtubeChannelHelper = require('./helpers/youtubeChannelHelper');
 
 //const app = express();
 //const port = process.env.PORT || 3000;
-const youtubeFetchTimeout = 10000;
+const youtubeFetchTimeout = 100000;
 
 const { Client, Collection, GatewayIntentBits } = require('discord.js');
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });

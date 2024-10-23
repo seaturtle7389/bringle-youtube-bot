@@ -4,7 +4,7 @@ const youtubeChannelHelper = require('../../helpers/youtubeChannelHelper')
 module.exports = {
 	cooldown: 5,
 	data: new SlashCommandBuilder()
-		.setName('addyoutubechannel')
+		.setName('add-youtube-channel')
 		.setDescription('Adds a YouTube channel to the bot')
 		.addStringOption(option =>
 			option

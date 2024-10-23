@@ -5,7 +5,7 @@ const youtubeChannelHelper = require('../../helpers/youtubeChannelHelper')
 module.exports = {
 	cooldown: 5,
 	data: new SlashCommandBuilder()
-		.setName('deleteyoutubechannel')
+		.setName('delete-youtube-channel')
 		.setDescription('Removes a YouTube channel that was added for notifications')
         // this displays to the user as a string, but because we use autocomplete we're really mapping the integers to the names
         .addIntegerOption(option =>
