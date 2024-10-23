@@ -83,9 +83,6 @@ async function fetchYoutubeChannelLivestreams(youtubeChannelId){
     url = youtubeSearchApiUrl + `part=snippet&channelId=${youtubeChannelId}&eventType=live&order=date&maxResults=1&type=video&key=${youtubeApiKey}`
     var response = await fetch(url);
     var myJson = await response.json();
-    console.log(url);
-    console.log(response);
-    console.log(myJson);
     return myJson;
 }
 */ 

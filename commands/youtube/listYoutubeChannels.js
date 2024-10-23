@@ -1,8 +1,10 @@
+require('dotenv').config();
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, ActionRowBuilder, ButtonStyle, ButtonBuilder, ActionRow, ComponentType } = require('discord.js');
 const YoutubeChannel = require('../../models/YoutubeChannel');
 const youtubeChannelHelper = require('../../helpers/youtubeChannelHelper')
 const util = require('util')
 var randomColor = require('randomcolor');
+const youtubeFetchTimeout = process.env.YOUTUBE_FETCH_INTERVAL / 60 / 1000;
 
 module.exports = {
 	cooldown: 5,
@@ -21,7 +23,6 @@ module.exports = {
         var response = await youtubeChannelHelper.fetchYoutubeChannelsDetails(youtubeChannelIds);
         if (response && response.items){
             const channelDetails = response.items;
-            console.log(channelDetails);
             var index = 0;
             var color = randomColor();
             var channel = await youtubeChannels.find((youtubeChannel) => youtubeChannel.youtube_id == channelDetails[index].id)
@@ -35,6 +36,7 @@ module.exports = {
                     {name: 'Subscribers', value: `${channelDetails[index].statistics.subscriberCount}`, inline: true},
                     {name: 'Uploads', value: `[Click Here](https://youtube.com/playlist?list=${channelDetails[index].contentDetails.relatedPlaylists.uploads})`, inline: true},
                     {name: 'Nickname', value: channel.name},
+                    {name: 'Video check interval', value: channel.video_check_interval != null ? `${channel.video_check_interval} minute(s)` : `${youtubeFetchTimeout} (bot default)`},
                     {name: 'YouTube channel ID', value: `\`${channel.youtube_id}\``, inline: true},
                     {name: 'Upload notifications', value: channel.upload_channel_id ? `channel: <#${channel.upload_channel_id}> ${channel.upload_role_id ? `\nrole ping: <@&${channel.upload_role_id}>` : ""}` : "N/A"},
                     {name: 'Livestream notifications', value: channel.livestream_channel_id ? `channel: <#${channel.livestream_channel_id}> ${channel.livestream_role_id ? `\nrole ping: <@&${channel.livestream_role_id}>` : ""}` : "N/A"},
@@ -85,8 +87,6 @@ module.exports = {
                 } else if (value == 'backward'){
                     index--;
                 }
-                console.log(index);
-                console.log(channelDetails);
                 //failsafes in case somehow people press buttons  they shouldn't be able to....
                 if(index < 0) {
                     index = 0;
@@ -105,6 +105,7 @@ module.exports = {
                         {name: 'Subscribers', value: `${channelDetails[index].statistics.subscriberCount}`, inline: true},
                         {name: 'Uploads', value: `[Click Here](https://youtube.com/playlist?list=${channelDetails[index].contentDetails.relatedPlaylists.uploads})`, inline: true},
                         {name: 'Nickname', value: updatedChannel.name},
+                        {name: 'Video check interval', value: updatedChannel.video_check_interval != null ? `${updatedChannel.video_check_interval} minute(s)` : `${youtubeFetchTimeout} (bot default)`},
                         {name: 'YouTube channel ID', value: `\`${updatedChannel.youtube_id}\``, inline: true},
                         {name: 'Upload notification channel', value: updatedChannel.upload_channel_id ? `channel: <#${updatedChannel.upload_channel_id}> ${updatedChannel.upload_role_id ? `\nrole ping: <@&${updatedChannel.upload_role_id}>` : ""}` : "N/A"},
                         {name: 'Livestream notification channel', value: updatedChannel.livestream_channel_id ? `channel: <#${updatedChannel.livestream_channel_id}> ${updatedChannel.livestream_role_id ? `\nrole ping: <@&${updatedChannel.livestream_role_id}>` : ""}` : "N/A"},

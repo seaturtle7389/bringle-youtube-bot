@@ -53,11 +53,13 @@ module.exports = {
 				await interaction.followUp(`**YouTube channel "${nickname}" was not added due to an unexpected error.**`);
 			}
 		} else {
-			if(nickname != existingYoutubeChannel.name){
+			var responseString = '';
+			if(nickname != existingYoutubeChannel.name || video_check_interval != existingYoutubeChannel.video_check_interval){
 				existingYoutubeChannel = await existingYoutubeChannel.update({
 					name: nickname,
+					video_check_interval: video_check_interval
 				})
-				responseString += `**The YouTube channel was updated!**\nChannel name: ${oldName} -> ${existingYoutubeChannel.name}\n`;
+				responseString += `**The YouTube channel was updated!**`;
 			} else{
 				//if nothing was changed
 				responseString = '**A YouTube channel already exists with this exact same information.** Did you mean to run this command?'
