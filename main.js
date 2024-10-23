@@ -9,7 +9,7 @@ const path = require('node:path');
 //const express = require('express')
 
 // import database models
-const {ServerGuild, YoutubeChannel, Op } = require('./dbObjects.js')
+const {ServerGuild, YoutubeChannel, YoutubeVideo, Op } = require('./dbObjects.js')
 
 // import helper
 const youtubeChannelHelper = require('./helpers/youtubeChannelHelper');
@@ -64,18 +64,6 @@ client.login(discordToken);
 
 setInterval(fetchLatestYoutubeVideos, youtubeFetchTimeout);
 
-async function fetchYoutubeVideos(){
-    guilds = await ServerGuild.findAll();
-    for (g of guilds) {
-        var youtubeChannels = await YoutubeChannel.findAll({where: {guild_id: g.id,livestream_channel_id: {[Op.not]: null}}})
-        for (yt of youtubeChannels) {
-            videoDetails = await youtubeChannelHelper.fetchAllYoutubeChannelVideos(yt.youtube_id);
-            console.log(yt.name);
-            console.log(videoDetails);
-        };
-    }; 
-}
-
 async function fetchLatestYoutubeVideos(){
     guilds = await ServerGuild.findAll();
     for (g of guilds) {
@@ -83,111 +71,67 @@ async function fetchLatestYoutubeVideos(){
         for (yt of youtubeChannels) {
             if(yt.livestream_channel_id != null || yt.upload_channel_id != null){
                 var videoDetails = await youtubeChannelHelper.fetchLatestYoutubeChannelVideos(yt.youtube_id);
-                console.log(yt.name);
                 for(video of videoDetails){
-                    if(video.liveStreamingDetails != null){
-                        // this video is a livestream, make sure we send livestream notifs for this Youtube channel
-                        if(yt.livestream_channel_id != null){
-                            var channel = client.channels.cache.get(yt.livestream_channel_id);
-                            if(video.liveStreamingDetails.scheduledStartTime != null){
-                                var now = Date.now();
-                                var date = new Date(video.liveStreamingDetails.scheduledStartTime).getTime()
-                                var unix_timestamp = date / 1000
-                                if(now < date){
-                                    var message = `New scheduled livestream from ${yt.name}! Channel will go live at <t:${unix_timestamp}:f>`
-                                } else {
-                                    var message = `New scheduled livestream from ${yt.name}! Should already be live (scheduled for <t:${unix_timestamp}:f>).`
-                                }
-                                
-                                
-                            } else {
-                                var message = `New scheduled livestream from ${yt.name}`
-                            }
+                    var youtubeVideoId = video.id;
+                    var youtubeVideoTitle = video.snippet.title;
+                    var  existingYoutubeVideo = await YoutubeVideo.findOne({where: {youtube_channel_id: yt.id, youtube_id: youtubeVideoId}});
 
-                            await channel.send(message);
+                    // we've already seen this video, just check to see if it's a livestream that hadn't started before
+                    if(existingYoutubeVideo != null){
+                        console.log(`Video already saved: ${yt.name} | ${youtubeVideoTitle} (Database ID: ${existingYoutubeVideo.id})`)
+                        if(existingYoutubeVideo.type == 'LIVESTREAM' && existingYoutubeVideo.started == false){
+                            console.log('Checking to see if livestream is live now and if we should post it')
+                            var livestreamDetails = video.liveStreamingDetails;
+                            if(livestreamDetails != null && livestreamDetails.actualStartTime != null && yt.livestream_channel_id){
+                                var channel = client.channels.cache.get(yt.livestream_channel_id);
+
+                                existingYoutubeVideo = await existingYoutubeVideo.update({
+                                    title: youtubeVideoTitle,
+                                    scheduled_start_time: livestreamDetails.actualStartTime,
+                                    started: true
+                                })
+
+                                var message = yt.buildStreamNotification(existingYoutubeVideo.getUrl, existingYoutubeVideo.title);
+                                await channel.send(message);
+                            }
                         }
                     } else {
-                        if(yt.upload_channel_id != null){
-                            console.log(video);
-                            var channel = client.channels.cache.get(yt.upload_channel_id);
-                            var message = await youtubeChannelHelper.getUploadNotificationString(client, yt.id, `https://youtu.be/${video.id}`, video.snippet.title);
-                            await channel.send(message);
+                        console.log(`New video from ${yt.name} | ${youtubeVideoTitle} (YouTube ID: ${video.id})`)
+                        // check to see if the video is a livestream, then confirm we have livestream notifs enabled
+                        var livestreamDetails = video.liveStreamingDetails;
+                        if(livestreamDetails != null && yt.livestream_channel_id){
+                            var channel = client.channels.cache.get(yt.livestream_channel_id);
+                            // an actual start time means that the video is live right now
+                            if(livestreamDetails.actualStartTime != null){
+                                var newYoutubeVideo = await youtubeVideoHelper.createYoutubeVideo(client, 'LIVESTREAM', video.id, yt.id, youtubeVideoTitle, livestreamDetails.actualStartTime, true)
+                                if(newYoutubeVideo){
+                                    var message = yt.buildStreamNotification(newYoutubeVideo.getUrl, newYoutubeVideo.title);
+                                    await channel.send(message);
+                                } else {
+                                    console.log("Video was unable to be saved due to an unexpected error")
+                                }
+                            } else {
+                                var newYoutubeVideo = await youtubeVideoHelper.createYoutubeVideo(client, 'LIVESTREAM', video.id, yt.id, youtubeVideoTitle, livestreamDetails.scheduledStartTime, false)
+                                if(newYoutubeVideo){
+                                    var message = yt.buildScheduledStreamNotification(newYoutubeVideo.getUrl, newYoutubeVideo.title, newYoutubeVideo.scheduled_start_time/1000);
+                                    await channel.send(message);
+                                } else {
+                                    console.log("Video was unable to be saved due to an unexpected error")
+                                }
+                            }                            
+                        // the video is an upload, confirm we have upload notifs enabled
+                        } else if(yt.upload_channel_id != null){
+                            var newYoutubeVideo = await youtubeVideoHelper.createYoutubeVideo(client, 'UPLOAD', video.id, yt.id, youtubeVideoTitle, null, null)
+                            if(newYoutubeVideo){
+                                var message = yt.buildUploadNotification(newYoutubeVideo.getUrl, newYoutubeVideo.title);
+                                await channel.send(message);
+                            } else {
+                                console.log("Video was unable to be saved due to an unexpected error")
+                            }
                         }
-                    }
+                    }   
                 }
-            }
-            
+            } 
         };
     }; 
 }
-
-/*let activeLiveStreams = new Set();
-
-async function fetchLiveStreamStatus() {
-    try {
-        // for(var youtubeChannel of youtubeChannels) {
-            var youtubeChannel = youtubeChannels[0];
-            console.log('Polling for ', JSON.stringify(youtubeChannel));
-            var url = `${youtubeApiUrl}&channelId=${youtubeChannel.channelId}&key=${youtubeApiKey}`;
-            var response = await fetch(url);
-            var myJson = await response.json();
-            
-            console.log('YouTube Response', JSON.stringify(myJson));
-            if(myJson && myJson.pageInfo && myJson.pageInfo.totalResults > 0) {
-                console.log('Found active stream for ', youtubeChannel.channelId);
-                myJson.items.forEach(element => {
-                    if(!activeLiveStreams.has(element.id.videoId)) {
-                        console.log(element);
-                        activeLiveStreams.add(element.id.videoId);
-    
-                        var discordObj = {
-                            username: 'Dumpster LIVE',
-                            avatar_url: 'https://yt3.ggpht.com/a/AGF-l7__zvPRgglwpeA85-NPjkxRlhi46IG3wKdwKg=s288-c-k-c0xffffffff-no-rj-mo',
-                            content: `Richlife is LIVE. **${element.snippet.title}**. Channel: ${youtubeChannel.channelUrl}`
-                        }
-                        postToDiscord(discordObj);
-                    } else {
-                        console.log(`Already alerted for this livestream ${element.id.videoId}. Skipping.`);
-                    }
-                });
-            } else {
-                var discordObj = {
-                    username: 'No one is live :(',
-                    avatar_url: 'https://yt3.ggpht.com/a/AGF-l7__zvPRgglwpeA85-NPjkxRlhi46IG3wKdwKg=s288-c-k-c0xffffffff-no-rj-mo',
-                    content: `Richlife is NOT LIVE.`
-                }
-                postToDiscord(discordObj);
-            }
-        // }
-    } catch (error) {
-        console.error(error);
-    }
-}*/
-
-/*function handleUploads() {
-    if (client.db.fetch(`postedVideos`) === null) client.db.set(`postedVideos`, []);
-    setInterval(() => {
-        client.request.parseURL(`https://www.youtube.com/feeds/videos.xml?channel_id=${client.config.channel_id}`)
-        .then(data => {
-            if (client.db.fetch(`postedVideos`).includes(data.items[0].link)) return;
-            else {
-                client.db.set(`videoData`, data.items[0]);
-                client.db.push("postedVideos", data.items[0].link);
-                let parsed = client.db.fetch(`videoData`);
-                let channel = client.channels.cache.get(client.config.channel);
-                if (!channel) return;
-                let message = client.config.messageTemplate
-                    .replace(/{author}/g, parsed.author)
-                    .replace(/{title}/g, Discord.Util.escapeMarkdown(parsed.title))
-                    .replace(/{url}/g, parsed.link);
-                channel.send(message);
-            }
-        });
-    }, client.config.watchInterval);
-}*/
-
-/*app.get('/', (req, res) => res.send('Shhh! Im busy monitoring Youtube Channels.'));
-app.listen(port, () => {
-    console.log(`App listening on port ${port}!`)
-    setInterval(fetchLiveStreamStatus, youtubeFetchTimeout);
-})*/

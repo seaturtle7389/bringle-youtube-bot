@@ -36,7 +36,7 @@ module.exports = {
         // everything we do later might take a little bit, so defer the reply
         await interaction.deferReply();
 
-		var  existingYoutubeChannel = await YoutubeChannel.findOne({where: {id: yt_channel_id}});
+		var  existingYoutubeChannel = await YoutubeChannel.findByPk(yt_channel_id);
         existingYoutubeChannel = await existingYoutubeChannel.update({
             upload_channel_id: null,
             upload_role_id: null, 

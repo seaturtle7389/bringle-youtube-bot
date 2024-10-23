@@ -26,8 +26,8 @@ module.exports = {
             var color = randomColor();
             var channel = await youtubeChannels.find((youtubeChannel) => youtubeChannel.youtube_id == channelDetails[index].id)
             var channelDetailsEmbed = new EmbedBuilder()
-                .setTitle(`${channelDetails[index].snippet.title} (${channelDetails[index].snippet.customUrl})`)
-                .setURL(`https://youtube.com/${channelDetails[index].snippet.customUrl}`)
+                .setTitle(`${channelDetails[index].snippet.title} (${channel.youtube_handle})`)
+                .setURL(channel.getUrl)
                 .setDescription(channelDetails[index].snippet.description)
                 .setThumbnail(channelDetails[index].snippet.thumbnails.default.url)
                 .setColor(color)
@@ -96,8 +96,8 @@ module.exports = {
 
                 var updatedChannel = await youtubeChannels.find((youtubeChannel) => youtubeChannel.youtube_id == channelDetails[index].id)
                 var updatedChannelDetailsEmbed = new EmbedBuilder()
-                    .setTitle(`${channelDetails[index].snippet.title} (${channelDetails[index].snippet.customUrl})`)
-                    .setURL(`https://youtube.com/${channelDetails[index].snippet.customUrl}`)
+                    .setTitle(`${channelDetails[index].snippet.title} (${updatedChannel.youtube_handle})`)
+                    .setURL(updatedChannel.getUrl)
                     .setDescription(channelDetails[index].snippet.description)
                     .setThumbnail(channelDetails[index].snippet.thumbnails.default.url)
                     .setColor(color)
@@ -106,8 +106,8 @@ module.exports = {
                         {name: 'Uploads', value: `[Click Here](https://youtube.com/playlist?list=${channelDetails[index].contentDetails.relatedPlaylists.uploads})`, inline: true},
                         {name: 'Nickname', value: updatedChannel.name},
                         {name: 'YouTube channel ID', value: `\`${updatedChannel.youtube_id}\``, inline: true},
-                        {name: 'Upload notification channel', value: updatedChannel.upload_channel_id ? `<#${updatedChannel.upload_channel_id}>` : 'N/A'},
-                        {name: 'Livestream notification channel', value: updatedChannel.livestream_channel_id ? `<#${updatedChannel.livestream_channel_id}>` : 'N/A'},
+                        {name: 'Upload notification channel', value: updatedChannel.upload_channel_id ? `channel: <#${updatedChannel.upload_channel_id}> ${updatedChannel.upload_role_id ? `\nrole ping: <@&${updatedChannel.upload_role_id}>` : ""}` : "N/A"},
+                        {name: 'Livestream notification channel', value: updatedChannel.livestream_channel_id ? `channel: <#${updatedChannel.livestream_channel_id}> ${updatedChannel.livestream_role_id ? `\nrole ping: <@&${updatedChannel.livestream_role_id}>` : ""}` : "N/A"},
                     )
                     .setFooter({text: `Viewing channel ${index + 1} of ${channelDetails.length}`})
                     .setTimestamp()

@@ -1,6 +1,6 @@
 async function createServerGuild(client, guildId) {
     var ServerGuild = client.ServerGuild
-    var  clientGuild = await ServerGuild.findOne({where: {id: guildId}});
+    var  clientGuild = await ServerGuild.findByPk(guildId);
     if (!clientGuild) {
         try{
             var newServerGuild = await ServerGuild.create({
@@ -22,7 +22,7 @@ async function createServerGuild(client, guildId) {
 
 async function deleteServerGuild(client, guildId) {
     var ServerGuild = client.ServerGuild
-    var  clientGuild = await ServerGuild.findOne({where: {id: guildId}});
+    var  clientGuild = await ServerGuild.findByPk(guildId);
     if (clientGuild) {
         try{
             clientGuild.destroy();

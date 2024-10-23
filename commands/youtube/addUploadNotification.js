@@ -60,13 +60,19 @@ module.exports = {
         // everything we do later might take a little bit, so defer the reply
         await interaction.deferReply();
 
-		var  existingYoutubeChannel = await YoutubeChannel.findOne({where: {id: yt_channel_id}});
+		var  existingYoutubeChannel = await YoutubeChannel.findByPk(yt_channel_id);
         existingYoutubeChannel = await existingYoutubeChannel.update({
             upload_channel_id: notif_channel_id,
             upload_role_id: notif_role_id, 
             upload_announcement: notif_text
         })
-        responseString = `Upload notifications for ${existingYoutubeChannel.name} have been updated! New posts will be made in <#${existingYoutubeChannel.upload_channel_id}>\n\n**Notification message:**\n${await youtubeChannelHelper.getUploadNotificationString(interaction.client, existingYoutubeChannel.id, sampleVideoUrl, sampleVideoTitle)}`;
+
+		// alert that changes were saved
+        var responseString = `Upload notifications for ${existingYoutubeChannel.name} have been updated! New posts will be made in <#${existingYoutubeChannel.upload_channel_id}>`
+		await interaction.followUp(responseString.replace(/^\s+|\s+$/g, ""));
+
+		// show preview
+		responseString = `**Notification preview:**\n${await existingYoutubeChannel.buildUploadNotification(sampleVideoUrl, sampleVideoTitle)}`;
         await interaction.followUp(responseString.replace(/^\s+|\s+$/g, ""));
 	},
 };

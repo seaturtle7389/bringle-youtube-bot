@@ -66,14 +66,27 @@ module.exports = {
         // everything we do later might take a little bit, so defer the reply
         await interaction.deferReply();
 
-		var  existingYoutubeChannel = await YoutubeChannel.findOne({where: {id: yt_channel_id}});
+		var  existingYoutubeChannel = await YoutubeChannel.findByPk(yt_channel_id);
         existingYoutubeChannel = await existingYoutubeChannel.update({
             livestream_channel_id: notif_channel_id,
             livestream_role_id: notif_role_id, 
             livestream_announcement: notif_text,
             scheduled_livestream_announcement: scheduled_notif_text
         })
-        responseString = `Stream notifications for ${existingYoutubeChannel.name} have been updated! New posts will be made in <#${existingYoutubeChannel.upload_channel_id}>\n\n**Notification message:**\n${await youtubeChannelHelper.getStreamNotificationString(interaction.client, existingYoutubeChannel.id, sampleVideoUrl, sampleVideoTitle)}`;
+
+		// alert that changes were saved
+        var responseString = `Stream notifications for ${existingYoutubeChannel.name} have been updated! New posts will be made in <#${existingYoutubeChannel.livestream_channel_id}>`
+		await interaction.followUp(responseString.replace(/^\s+|\s+$/g, ""));
+
+		// show preview
+		responseString = `**Notification preview:**\n${await existingYoutubeChannel.buildStreamNotification(sampleVideoUrl, sampleVideoTitle)}`
+		await interaction.followUp(responseString.replace(/^\s+|\s+$/g, ""));
+
+		// show scheduled preview
+		var randomMinutes = Math.floor(Math.random() * 60);
+		var randomMilliseconds = randomMinutes * 60 * 1000;
+		var sampleUnixTime = (Date.now() + randomMilliseconds) / 1000;
+		responseString = `**Scheduled notification preview:**\n${await existingYoutubeChannel.buildScheduledStreamNotification(sampleVideoUrl, sampleVideoTitle, sampleUnixTime)}`;
         await interaction.followUp(responseString.replace(/^\s+|\s+$/g, ""));
-	},
+	}
 };
