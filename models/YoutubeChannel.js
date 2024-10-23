@@ -42,9 +42,9 @@ module.exports = function(sequelize, DataTypes){
         validate: {
             // only allow values for upload_announcement and upload_role_id if upload_channel_id is set
             checkUploadFields() {
-                if (this.upload_channel_id == nil){
+                if (this.upload_channel_id == null){
                     var invalidUploadFields = []
-                    this.uploadFields.forEach(function(value){
+                    this.uploadFields().forEach(function(value){
                         if(value[1] != null) invalidUploadFields.push(value[0]);
                     })
 
@@ -55,9 +55,9 @@ module.exports = function(sequelize, DataTypes){
             },
             // only allow values for livestream_announcement, scheduled_livestream_announcement, and livestream_role_id if livestream_channel_id is set
             checkLivestreamFields() {
-                if (this.livestream_channel_id == nil){
+                if (this.livestream_channel_id == null){
                     var invalidLivestreamFields = []
-                    this.livestreamFields.forEach(function(value){
+                    this.livestreamFields().forEach(function(value){
                         if(value[1] != null) invalidLivestreamFields.push(value[0]);
                     })
 

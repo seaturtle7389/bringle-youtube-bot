@@ -1,6 +1,5 @@
 require('dotenv').config();
-const { SlashCommandBuilder, PermissionFlagsBits, ChannelType, EmbedBuilder } = require('discord.js');
-const youtubeChannelHelper = require('../../helpers/youtubeChannelHelper')
+const { SlashCommandBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
 const sampleVideoUrl = process.env.SAMPLE_VIDEO_URL;
 const sampleVideoTitle = process.env.SAMPLE_VIDEO_TITLE;
 
@@ -61,7 +60,7 @@ module.exports = {
 		var notif_role = interaction.options.getRole('notif_role');
         var notif_role_id = notif_role ? notif_role.id : null;
 		var notif_text = interaction.options.getString('notif_text');
-        var scheduled_notif_text = interaction.options.getSTring('scheduled_notif_text');
+        var scheduled_notif_text = interaction.options.getString('scheduled_notif_text');
 		
         // everything we do later might take a little bit, so defer the reply
         await interaction.deferReply();
@@ -85,7 +84,7 @@ module.exports = {
 		// show scheduled preview
 		var randomMinutes = Math.floor(Math.random() * 60);
 		var randomMilliseconds = randomMinutes * 60 * 1000;
-		var sampleUnixTime = (Date.now() + randomMilliseconds) / 1000;
+		var sampleUnixTime = Math.floor((Date.now() + randomMilliseconds) / 1000);
 		responseString = `**Scheduled notification preview:**\n${await existingYoutubeChannel.buildScheduledStreamNotification(sampleVideoUrl, sampleVideoTitle, sampleUnixTime)}`;
         await interaction.followUp(responseString.replace(/^\s+|\s+$/g, ""));
 	}

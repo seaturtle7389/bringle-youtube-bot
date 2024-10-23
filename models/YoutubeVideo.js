@@ -33,14 +33,14 @@ module.exports = function(sequelize, DataTypes){
             checkLivestreamFields() {
                 var invalidLivestreamFields = []
                 if (this.type == 'LIVESTREAM'){
-                    this.livestreamFields.forEach(function(value){
+                    this.livestreamFields().forEach(function(value){
                         if(value[1] == null) invalidLivestreamFields.push(value[0]);
                     })
                     if (invalidLivestreamFields.length > 0){
                         throw new Error(`${invalidLivestreamFields.length > 1 ? "Fields" : "Field"} ${invalidLivestreamFields.join(', ')} must be set on videos of type LIVESTREAM.`)
                     }
                 } else {
-                    this.livestreamFields.forEach(function(value){
+                    this.livestreamFields().forEach(function(value){
                         if(value[1] != null) invalidLivestreamFields.push(value[0]);
                     })
                     if (invalidLivestreamFields.length > 0){
