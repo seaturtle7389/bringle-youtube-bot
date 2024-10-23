@@ -1,4 +1,5 @@
-const Sequelize = require('sequelize');
+require('dotenv').config();
+const youtubeFetchTimeout = process.env.YOUTUBE_FETCH_INTERVAL;
 
 module.exports = function(sequelize, DataTypes){
     const YoutubeChannel = sequelize.define('youtube_channel', {
@@ -22,6 +23,8 @@ module.exports = function(sequelize, DataTypes){
             type: DataTypes.STRING,
             allowNull: false
         },
+        video_check_interval: DataTypes.INTEGER,
+        last_checked: DataTypes.DATE,
 
         upload_channel_id: DataTypes.STRING,
         upload_announcement: DataTypes.STRING,
@@ -91,6 +94,22 @@ module.exports = function(sequelize, DataTypes){
     //
     // instance methods
     //
+
+    // returns true if we're past the interval needed to check for videos
+    YoutubeChannel.prototype.checkVideoInterval = function(){
+        if(this.last_checked == null){
+            return true
+        } else {
+            var now = Date.now();
+            if(this.video_check_interval != null && this.video_check_interval > 0){
+                var intervalInMilliseconds = this.video_check_interval * 60 * 1000;
+            } else {
+                var intervalInMilliseconds = parseInt(youtubeFetchTimeout);
+            }
+            var nextCheckTime = this.last_checked.getTime() + intervalInMilliseconds;
+            return now > nextCheckTime;
+        }
+     }
 
     // return upload fields
     YoutubeChannel.prototype.uploadFields = function(){

@@ -72,8 +72,13 @@ async function fetchLatestYoutubeVideos(){
     for (g of guilds) {
         var youtubeChannels = await YoutubeChannel.findAll({where: {guild_id: g.id}})
         for (yt of youtubeChannels) {
-            if(yt.livestream_channel_id != null || yt.upload_channel_id != null){
+            // only proceed if we're past the timeout interval specified for this channel, and a notification channel is set up
+            if(yt.checkVideoInterval() && (yt.livestream_channel_id != null || yt.upload_channel_id != null)){
                 var videoDetails = await youtubeChannelHelper.fetchLatestYoutubeChannelVideos(yt.youtube_id);
+                // once we've grabbed the data, store the timestamp
+                yt = await yt.update({
+					last_checked: Date.now()
+				})
 
                 if(yt.livestream_channel_id != null){
                     var livestream_channel = client.channels.cache.get(yt.livestream_channel_id);

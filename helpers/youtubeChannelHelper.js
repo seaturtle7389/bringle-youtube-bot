@@ -33,7 +33,7 @@ async function getYoutubeChannelIdFromHandle(handle) {
     return null;
 }
 
-async function createYoutubeChannel(client, name, guild_id, youtube_channel_id, youtube_channel_handle){
+async function createYoutubeChannel(client, name, guild_id, youtube_channel_id, youtube_channel_handle, video_check_interval){
     var YoutubeChannel = client.YoutubeChannel;
 
     var  clientYoutubeChannel = await YoutubeChannel.findOne({where: {youtube_id: youtube_channel_id, guild_id: guild_id}});
@@ -44,6 +44,7 @@ async function createYoutubeChannel(client, name, guild_id, youtube_channel_id, 
                 guild_id: guild_id,
                 youtube_id: youtube_channel_id,
                 youtube_handle: youtube_channel_handle,
+                video_check_interval: video_check_interval
             })
             return newYoutubeChannel;
         }

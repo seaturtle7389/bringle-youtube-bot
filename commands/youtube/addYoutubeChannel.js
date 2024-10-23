@@ -1,5 +1,7 @@
+require('dotenv').config();
 const { SlashCommandBuilder, PermissionFlagsBits, ChannelType, EmbedBuilder } = require('discord.js');
-const youtubeChannelHelper = require('../../helpers/youtubeChannelHelper')
+const youtubeChannelHelper = require('../../helpers/youtubeChannelHelper');
+const youtubeFetchTimeout = process.env.YOUTUBE_FETCH_INTERVAL / 60 / 1000;
 
 module.exports = {
 	cooldown: 5,
@@ -18,11 +20,17 @@ module.exports = {
 				.setDescription('The name you want to assign to this channel for reference')
 				.setRequired(true)
 		)
+		.addIntegerOption(option =>
+			option
+				.setName('video_check_interval')
+				.setDescription(`how long to wait in minutes before checking for new videos (defaults to the bot's minimum of  ${youtubeFetchTimeout})`)
+		)
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
 		.setContexts([0]),
 	async execute(interaction) {
 		var yt_handle = interaction.options.getString('yt_handle');
 		var nickname = interaction.options.getString('nickname');
+		var video_check_interval = interaction.options.getInteger('video_check_interval');
 		var guild = interaction.guild;
 		var YoutubeChannel = interaction.client.YoutubeChannel
 		
@@ -38,7 +46,7 @@ module.exports = {
 				return;
 			}
 
-			var newYoutubeChannel = await youtubeChannelHelper.createYoutubeChannel(interaction.client, nickname, guild.id, yt_channel_id, yt_handle)
+			var newYoutubeChannel = await youtubeChannelHelper.createYoutubeChannel(interaction.client, nickname, guild.id, yt_channel_id, yt_handle, video_check_interval)
 			if (newYoutubeChannel){
 				await interaction.followUp(`**YouTube channel "${newYoutubeChannel.name}" was added!**`);
 			} else {

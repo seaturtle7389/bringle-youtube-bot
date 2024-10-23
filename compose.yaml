@@ -1,5 +1,6 @@
 services:
   discord:
+    restart: always
     volumes:
       - ./database.sqlite:/usr/src/app/database.sqlite
     env_file: 

@@ -17,35 +17,32 @@ const ServerGuild = require('./models/Guild.js')(sequelize, DataTypes)
 const YoutubeChannel = require('./models/YoutubeChannel.js')(sequelize, DataTypes)
 const YoutubeVideo = require('./models/YoutubeVideo.js')(sequelize, DataTypes)
 
-ServerGuild.hasMany(YoutubeChannel, {
-	onDelete: 'CASCADE'
-})
-
 // guildYoutubeChannelConstraint combines guild_id and youtube_id to make a unique constraint
 // this means one guild can't have the same channel added twice
-YoutubeChannel.belongsTo(ServerGuild, {
+ServerGuild.hasMany(YoutubeChannel, {
 	foreignKey: {
-		type: DataTypes.STRING,
-		name: 'guild_id',
 		allowNull: false,
-		unique: 'guildYoutubeChannelConstraint'
+		unique: 'guildYoutubeChannelConstraint',
+		onDelete: 'CASCADE',
+		underscored: true,
+		name: "guild_id"
 	}
-});
-
-YoutubeChannel.hasMany(YoutubeVideo, {
-	onDelete: 'CASCADE'
 })
+
+YoutubeChannel.belongsTo(ServerGuild);
 
 // channelVideoConstraint combines youtube_channel_id and youtube_id to make a unique constraint
 // this means one channel instance (and one guild by extension) cannot have the same video added twice
 // notably, the same channel added in a different guild would not have this restriction, so guilds can get notifications for the same video without issue
-YoutubeVideo.belongsTo(YoutubeChannel, {
+YoutubeChannel.hasMany(YoutubeVideo, {
 	foreignKey: {
-		type: DataTypes.INTEGER,
-		name: 'youtube_channel_id',
 		allowNull: false,
-		unique: 'channelVideoConstraint'
+		unique: 'channelVideoConstraint',
+		onDelete: 'cascade',
+		name: "youtube_channel_id"
 	}
 })
+
+YoutubeVideo.belongsTo(YoutubeChannel)
 
 module.exports = {sequelize, ServerGuild, YoutubeChannel, YoutubeVideo, DataTypes, Op}
