@@ -1,4 +1,5 @@
-require('dotenv').config();
+const envFileName = `.env.${process.env.APP_ENV || "development"}`
+require('dotenv').config({ path: envFileName });
 const youtubeApiKey = process.env.YOUTUBE_API_KEY;
 const youtubeChannelApiUrl = 'https://www.googleapis.com/youtube/v3/channels?'
 const youtubePlaylistApiUrl = 'https://youtube.googleapis.com/youtube/v3/playlistItems?'

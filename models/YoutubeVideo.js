@@ -1,5 +1,3 @@
-const Sequelize = require('sequelize');
-
 module.exports = function(sequelize, DataTypes){
     const YoutubeVideo =  sequelize.define('youtube_video', {
         id: {

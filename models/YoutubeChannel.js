@@ -1,4 +1,5 @@
-require('dotenv').config();
+const envFileName = `.env.${process.env.APP_ENV || "development"}`
+require('dotenv').config({ path: envFileName });
 const youtubeFetchTimeout = process.env.YOUTUBE_FETCH_INTERVAL;
 
 module.exports = function(sequelize, DataTypes){

@@ -1,4 +1,5 @@
-require('dotenv').config();
+const envFileName = `.env.${process.env.APP_ENV || "development"}`
+require('dotenv').config({ path: envFileName });
 const { SlashCommandBuilder, PermissionFlagsBits, ChannelType, EmbedBuilder } = require('discord.js');
 const youtubeChannelHelper = require('../../helpers/youtubeChannelHelper');
 const youtubeFetchTimeout = process.env.YOUTUBE_FETCH_INTERVAL / 60 / 1000;

@@ -21,6 +21,6 @@
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
-database.sqlite
+*.sqlite
 LICENSE
 README.md

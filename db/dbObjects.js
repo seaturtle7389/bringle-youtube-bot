@@ -1,21 +1,13 @@
-require('dotenv').config();
-const Sequelize = require('sequelize');
-const databaseUser = process.env.DATABASE_USER;
-const databasePassword = process.env.DATABASE_PASSWORD;
-const DataTypes = Sequelize.DataTypes;
-const Op = Sequelize.Op;
+const envFileName = `.env.${process.env.APP_ENV || "development"}`
+require('dotenv').config({ path: envFileName });
+const db = require('../models/index.js');
+const sequelize = db.sequelize;
+const DataTypes = db.Sequelize.DataTypes;
+const Op = db.Sequelize.Op;
 
-const sequelize = new Sequelize('youtube-bot', databaseUser, databasePassword, {
-	host: 'localhost',
-	dialect: 'sqlite',
-	logging: false,
-	// SQLite only
-	storage: 'database.sqlite',
-});
-
-const ServerGuild = require('./models/Guild.js')(sequelize, DataTypes)
-const YoutubeChannel = require('./models/YoutubeChannel.js')(sequelize, DataTypes)
-const YoutubeVideo = require('./models/YoutubeVideo.js')(sequelize, DataTypes)
+const ServerGuild = require('../models/Guild.js')(sequelize, DataTypes)
+const YoutubeChannel = require('../models/YoutubeChannel.js')(sequelize, DataTypes)
+const YoutubeVideo = require('../models/YoutubeVideo.js')(sequelize, DataTypes)
 
 // guildYoutubeChannelConstraint combines guild_id and youtube_id to make a unique constraint
 // this means one guild can't have the same channel added twice
@@ -45,4 +37,4 @@ YoutubeChannel.hasMany(YoutubeVideo, {
 
 YoutubeVideo.belongsTo(YoutubeChannel)
 
-module.exports = {sequelize, ServerGuild, YoutubeChannel, YoutubeVideo, DataTypes, Op}
+module.exports = {sequelize, DataTypes, Op, ServerGuild, YoutubeChannel, YoutubeVideo}

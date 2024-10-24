@@ -1,4 +1,6 @@
-require('dotenv').config();
+
+const envFileName = `.env.${process.env.APP_ENV || "development"}`
+require('dotenv').config({ path: envFileName });
 const { SlashCommandBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
 const sampleVideoUrl = process.env.SAMPLE_VIDEO_URL;
 const sampleVideoTitle = process.env.SAMPLE_VIDEO_TITLE;

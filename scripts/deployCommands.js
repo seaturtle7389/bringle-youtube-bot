@@ -1,6 +1,7 @@
 const path = require('node:path');
 const fs = require('node:fs');
-require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+const envFileName = `.env.${process.env.APP_ENV || "development"}`
+require('dotenv').config({ path: envFileName });
 
 const { REST, Routes } = require('discord.js');
 const token = process.env.DISCORD_TOKEN;

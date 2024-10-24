@@ -1,23 +1,18 @@
-require('dotenv').config();
+const envFileName = `.env.${process.env.APP_ENV || "development"}`
+require('dotenv').config({ path: envFileName });
+console.log(`Starting app using ${envFileName}`)
 const discordToken = process.env.DISCORD_TOKEN;
-//const youtubeApiKey = process.env.YOUTUBE_API_KEY;
-//const youtubeApiUrl = 'https://www.googleapis.com/youtube/v3/search?part=snippet&eventType=live&type=video';
 
 const fs = require('node:fs');
 const path = require('node:path');
-//const fetch = require("node-fetch");
-//const express = require('express')
 
 // import database models
-const {ServerGuild, YoutubeChannel, YoutubeVideo, Op } = require('./dbObjects.js')
+const {ServerGuild, YoutubeChannel, YoutubeVideo, Op } = require('./db/dbObjects.js')
 
 // import helper
 const youtubeChannelHelper = require('./helpers/youtubeChannelHelper');
 const youtubeVideoHelper = require('./helpers/youtubeVideoHelper');
 
-
-//const app = express();
-//const port = process.env.PORT || 3000;
 const youtubeFetchTimeout = process.env.YOUTUBE_FETCH_INTERVAL;
 
 const { Client, Collection, GatewayIntentBits } = require('discord.js');
@@ -28,8 +23,6 @@ client.ServerGuild = ServerGuild;
 client.YoutubeChannel = YoutubeChannel;
 client.YoutubeVideo = YoutubeVideo;
 client.Op = Op;
-
-//let rssParser = new (require("rss-parser"))();
 
 //import commands from the commands directory s
 client.commands = new Collection();

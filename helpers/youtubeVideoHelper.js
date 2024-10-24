@@ -1,4 +1,5 @@
-require('dotenv').config();
+const envFileName = `.env.${process.env.APP_ENV || "development"}`
+require('dotenv').config({ path: envFileName });
 
 async function createYoutubeVideo(client, type, youtube_id, youtube_channel_id, title, scheduled_start_time, started){
     var YoutubeVideo = client.YoutubeVideo

@@ -1,4 +1,5 @@
-require('dotenv').config();
+const envFileName = `.env.${process.env.APP_ENV || "development"}`
+require('dotenv').config({ path: envFileName });
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, ActionRowBuilder, ButtonStyle, ButtonBuilder, ActionRow, ComponentType } = require('discord.js');
 const YoutubeChannel = require('../../models/YoutubeChannel');
 const youtubeChannelHelper = require('../../helpers/youtubeChannelHelper')

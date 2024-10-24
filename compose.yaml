@@ -1,14 +1,9 @@
 services:
   discord:
+    env_file: 
+      - path: ".env.production"
+        required: true
     restart: always
     volumes:
-      - ./database.sqlite:/usr/src/app/database.sqlite
-    env_file: 
-      - path: ".env"
-        required: true
+      - ./db/prodDatabase.sqlite:/usr/src/app/db/prodDatabase.sqlite
     build: .
-    develop:
-      watch:
-        - action: sync
-          path: .
-          target: /code
