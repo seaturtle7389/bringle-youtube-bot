@@ -39,7 +39,7 @@ module.exports = {
 				.setName('scheduled_notif_text')
 				.setDescription('Custom notification text for scheduled livestreams (optional)')
 		)
-		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
 		.setContexts([0]),
         async autocomplete(interaction){
             // handle the autocompletion response

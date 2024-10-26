@@ -12,7 +12,7 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('list-youtube-channels')
 		.setDescription('Displays all YouTube channels currently set up on the server')
-		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
 		.setContexts([0]),
 	async execute(interaction) {
         await interaction.deferReply();

@@ -5,7 +5,7 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('ping')
 		.setDescription('Replies with Pong!')
-		.setDefaultMemberPermissions(PermissionFlagsBits.SendMessages)
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
 		.setContexts([0]),
 	async execute(interaction) {
 		await interaction.reply({content: 'Pong!', ephemeral: true });

@@ -13,7 +13,7 @@ module.exports = {
 				.setRequired(true)
                 .setAutocomplete(true)
 		)
-		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
 		.setContexts([0]),
         async autocomplete(interaction){
             // handle the autocompletion response

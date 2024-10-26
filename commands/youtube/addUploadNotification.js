@@ -34,7 +34,7 @@ module.exports = {
 				.setName('notif_text')
 				.setDescription('Custom notification text (optional)')
 		)
-		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
 		.setContexts([0]),
         async autocomplete(interaction){
             // handle the autocompletion response

@@ -26,7 +26,7 @@ module.exports = {
 				.setName('video_check_interval')
 				.setDescription(`how long to wait in minutes before checking for new videos (defaults to the bot's minimum of  ${youtubeFetchTimeout})`)
 		)
-		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
 		.setContexts([0]),
 	async execute(interaction) {
 		var yt_handle = interaction.options.getString('yt_handle');
