@@ -1,8 +1,7 @@
 services:
   discord:
     env_file: 
-      - path: ".env.production"
-        required: true
+      - .env.production
     restart: always
     volumes:
       - ./db/prodDatabase.sqlite:/usr/src/app/db/prodDatabase.sqlite
