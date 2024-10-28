@@ -7,7 +7,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 // import database models
-const {ServerGuild, YoutubeChannel, YoutubeVideo, Op } = require('./db/dbObjects.js')
+const {ServerGuild, YoutubeChannel, YoutubeVideo, RoleMenu, ReactionRole, Op } = require('./db/dbObjects.js')
 
 // import helper
 const youtubeChannelHelper = require('./helpers/youtubeChannelHelper');
@@ -22,9 +22,11 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 client.ServerGuild = ServerGuild;
 client.YoutubeChannel = YoutubeChannel;
 client.YoutubeVideo = YoutubeVideo;
+client.RoleMenu = RoleMenu;
+client.ReactionRole = ReactionRole;
 client.Op = Op;
 
-//import commands from the commands directory s
+//import commands from the commands directory sf
 client.commands = new Collection();
 client.cooldowns = new Collection();
 const foldersPath = path.join(__dirname, 'commands');

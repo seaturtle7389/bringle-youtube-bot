@@ -61,6 +61,97 @@ module.exports = {
 			} catch (error) {
 				console.error(error);
 			}
+		} else if (interaction.isButton()) {
+			await interaction.deferReply({ephemeral: true});
+
+			var buttonId = interaction.customId;
+			var ReactionRole = interaction.client.ReactionRole;
+			var role = await ReactionRole.findByPk(parseInt(buttonId));
+			if(role){
+				var member = interaction.member;
+				try{
+					if(member.roles.cache.has(role.role_id)){
+						var success = await member.roles.remove(role.role_id); 
+						if(success) {
+							return interaction.followUp({
+								content: `Successfully removed <@&${role.role_id}>!`
+							});
+						} else {
+							return interaction.followUp({
+								content: 'Unable to remove role.'
+							});
+						}
+					} else {
+						var success = await member.roles.add(role.role_id);
+						if(success) {
+							return interaction.followUp({
+								content: `Successfully added <@&${role.role_id}>!`
+							})
+						} else {
+							return interaction.followUp({
+								content: 'Unable to add role.'
+							})
+						}
+				 	} 
+				} catch (error){
+					console.log(error);
+					return interaction.followUp({
+						content: `**There was an error while handling the interaction**\n\`\`\`code: ${error.code}\nmessage: ${error.message}\`\`\``
+					})
+				}
+			}
+
+		} else if (interaction.isStringSelectMenu()) {
+			await interaction.deferReply({ephemeral: true});
+
+			var selectId = interaction.customId;
+			var RoleMenu = interaction.client.RoleMenu;
+			var menu = await RoleMenu.findByPk(parseInt(selectId));
+			if(menu && interaction.values[0] != null){
+				var member = interaction.member;
+				var ReactionRole = interaction.client.ReactionRole;
+				var selectedRole = await ReactionRole.findByPk(parseInt(interaction.values[0]));
+				var menuRoles = await menu.getReaction_roles();
+				if(selectedRole && menuRoles){
+					try{
+						var roleAdded = false;
+						var roleRemoved = false;
+						for(role of menuRoles){
+							if(role.id == selectedRole.id){
+								if(!member.roles.cache.has(role.role_id)){
+									await member.roles.add(role.role_id); 
+									roleAdded = true;
+								}
+							} else {
+								if(member.roles.cache.has(role.role_id)){
+									await member.roles.remove(role.role_id); 
+									roleRemoved = true;
+								}
+							}
+						}
+						var message = ""
+						if(roleAdded){
+							message += `Successfully added <@&${selectedRole.role_id}>!`
+						} else {
+							message += `Unable to add <@&${selectedRole.role_id}> - do you already have it?`
+
+						}
+
+						if(roleRemoved){
+							message += ` Other selectable roles were removed.`
+						}
+
+						return interaction.followUp({
+							content: message
+						})
+					} catch (error) {
+						console.log(error);
+						return interaction.followUp({
+							content: `**There was an error while handling the interaction**\n\`\`\`code: ${error.code}\nmessage: ${error.message}\`\`\``
+						})
+					}
+				}
+			}
 		} else {
 			return;
 		}

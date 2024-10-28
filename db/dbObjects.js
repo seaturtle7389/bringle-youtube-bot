@@ -5,9 +5,12 @@ const sequelize = db.sequelize;
 const DataTypes = db.Sequelize.DataTypes;
 const Op = db.Sequelize.Op;
 
-const ServerGuild = require('../models/Guild.js')(sequelize, DataTypes)
-const YoutubeChannel = require('../models/YoutubeChannel.js')(sequelize, DataTypes)
-const YoutubeVideo = require('../models/YoutubeVideo.js')(sequelize, DataTypes)
+const ServerGuild = require('../models/Guild.js')(sequelize, DataTypes);
+const YoutubeChannel = require('../models/YoutubeChannel.js')(sequelize, DataTypes);
+const YoutubeVideo = require('../models/YoutubeVideo.js')(sequelize, DataTypes);
+const RoleMenu = require('../models/RoleMenu.js')(sequelize, DataTypes);
+const ReactionRole = require('../models/ReactionRole.js')(sequelize, DataTypes);
+
 
 // guildYoutubeChannelConstraint combines guild_id and youtube_id to make a unique constraint
 // this means one guild can't have the same channel added twice
@@ -19,7 +22,7 @@ ServerGuild.hasMany(YoutubeChannel, {
 		underscored: true,
 		name: "guild_id"
 	}
-})
+});
 
 YoutubeChannel.belongsTo(ServerGuild);
 
@@ -33,8 +36,30 @@ YoutubeChannel.hasMany(YoutubeVideo, {
 		onDelete: 'cascade',
 		name: "youtube_channel_id"
 	}
-})
+});
 
 YoutubeVideo.belongsTo(YoutubeChannel)
 
-module.exports = {sequelize, DataTypes, Op, ServerGuild, YoutubeChannel, YoutubeVideo}
+ServerGuild.hasMany(RoleMenu, {
+	foreignKey: {
+		allowNull: false,
+		onDelete: 'CASCADE',
+		underscored: true,
+		name: "guild_id"
+	}
+});
+
+RoleMenu.belongsTo(ServerGuild);
+
+RoleMenu.hasMany(ReactionRole, {
+	foreignKey: {
+		allowNull: false,
+		onDelete: 'cascade',
+		name: "role_menu_id",
+		unique: 'guildRoleMenuConstraint'
+	}
+});
+
+ReactionRole.belongsTo(RoleMenu);
+
+module.exports = {sequelize, DataTypes, Op, ServerGuild, YoutubeChannel, YoutubeVideo, RoleMenu, ReactionRole}

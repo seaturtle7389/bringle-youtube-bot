@@ -6,12 +6,10 @@
   "scripts": {
     "prod-migrate":"npx sequelize-cli db:migrate --env production",
     "migrate":"npx sequelize-cli db:migrate --env development",
-
     "prod-deploy-global-commands": "APP_ENV=production node scripts/deployCommands.js --global",
     "deploy-commands": "node scripts/deployCommands.js",
-
     "prod-start": "APP_ENV=production node main.js",
-    "start": "node main.js",
+    "start": "node main.js"
   },
   "author": "seaturtle7389",
   "license": "",
