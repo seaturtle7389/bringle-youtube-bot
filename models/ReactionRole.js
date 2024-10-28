@@ -24,6 +24,18 @@ module.exports = function(sequelize, DataTypes){
     }, 
     {   underscored: true, 
         timestamps: true, 
+        validate: {
+            // don't save more than 25 reaction roles to one menu if the menu's type is button
+            checkMenuLimit() {
+                var roleMenu = this.getRole_menu();
+                if(roleMenu.type == 'BUTTON'){
+                    allRoles = roleMenu.getReaction_roles();
+                    if(allRoles.length >= 25){
+                        throw new Error(`The maximum number of reaction roles that can be assigned to a button menu is 25.`)
+                    }
+                }
+            }
+        }
     })
 
     //

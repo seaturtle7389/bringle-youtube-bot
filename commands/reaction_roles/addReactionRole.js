@@ -59,13 +59,13 @@ module.exports = {
             if(role){
                 try{
                     var roleMenu = await role.getRole_menu();
-                    var row = await roleMenu.buildActionRow();
+                    var rows = await roleMenu.buildActionRow();
 
                     var message_channel = await interaction.client.channels.cache.get(roleMenu.channel_id);
                     var message = await message_channel.messages.fetch(roleMenu.message_id);
 
-                    if(row){
-                        await message.edit({components: [row]})
+                    if(rows){
+                        await message.edit({components: rows})
                     } else {
                         await message.edit({components: []})
                     }

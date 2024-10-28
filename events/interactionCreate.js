@@ -110,14 +110,17 @@ module.exports = {
 			if(menu && interaction.values[0] != null){
 				var member = interaction.member;
 				var ReactionRole = interaction.client.ReactionRole;
-				var selectedRole = await ReactionRole.findByPk(parseInt(interaction.values[0]));
+				var selectedValue = interaction.values[0];
+				if(selectedValue != "remove_all"){
+					var selectedRole = await ReactionRole.findByPk(parseInt(interaction.values[0]));
+				}
 				var menuRoles = await menu.getReaction_roles();
-				if(selectedRole && menuRoles){
+				if(menuRoles){
 					try{
 						var roleAdded = false;
 						var roleRemoved = false;
 						for(role of menuRoles){
-							if(role.id == selectedRole.id){
+							if(selectedRole && role.id == selectedRole.id){
 								if(!member.roles.cache.has(role.role_id)){
 									await member.roles.add(role.role_id); 
 									roleAdded = true;
@@ -130,16 +133,19 @@ module.exports = {
 							}
 						}
 						var message = ""
-						if(roleAdded){
-							message += `Successfully added <@&${selectedRole.role_id}>!`
+						if(selectedValue == "remove_all"){
+							message += `All selectable roles were removed.`
 						} else {
-							message += `Unable to add <@&${selectedRole.role_id}> - do you already have it?`
-
+							if(roleAdded){
+								message += `Successfully added <@&${selectedRole.role_id}>!`
+							} else {
+								message += `Unable to add <@&${selectedRole.role_id}> - do you already have it?`
+							}
+							if(roleRemoved){
+								message += ` Other selectable roles were removed.`
+							}
 						}
-
-						if(roleRemoved){
-							message += ` Other selectable roles were removed.`
-						}
+						
 
 						return interaction.followUp({
 							content: message
