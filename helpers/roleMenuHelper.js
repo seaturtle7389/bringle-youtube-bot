@@ -33,7 +33,7 @@ async function createRoleMenu(client, type, guild_id, channel_id, message_id, ti
 
 async function updateRoleMenu(client, role_menu_id, type, title, text){
     var RoleMenu = client.RoleMenu
-    var  roleMenu = await RoleMenu.findOne({where: {id: role_menu_id}});
+    var  roleMenu = await RoleMenu.findByPk(role_menu_id);
     if (roleMenu) {
         try{
             var roleMenu = await roleMenu.update({

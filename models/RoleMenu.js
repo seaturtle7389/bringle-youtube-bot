@@ -105,7 +105,6 @@ module.exports = function(sequelize, DataTypes){
             if(currentRow.components.length > 0 && rows.length < 6){
                 rows.push(currentRow)
             }
-            console.log(currentRow);
             return rows;
         } else if (this.type == "DROPDOWN"){
             const select = new StringSelectMenuBuilder()

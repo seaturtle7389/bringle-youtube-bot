@@ -47,6 +47,27 @@ async function deleteReactionRole(client, reaction_role_id){
     return false;
 }
 
+async function updateReactionRole(client, reaction_role_id, name, emoji_id){
+    var ReactionRole = client.ReactionRole
+    var  reactionRole = await ReactionRole.findByPk(reaction_role_id);
+    if (reactionRole) {
+        try{
+            reactionRole = reactionRole.update({
+                name: name,
+                emoji_id: emoji_id
+            });
+            console.log("Reaction Role was updated")
+            return reactionRole;
+        }
+        catch (error) {  
+            console.log(`Something went wrong when updating reaction role ${reaction_role_id}`)
+        }  
+    } else {
+        console.log("Reaction Role does not exist")
+    }
+    return false;
+}
+
 module.exports = {
-    createReactionRole, deleteReactionRole
+    createReactionRole, deleteReactionRole, updateReactionRole
 }
