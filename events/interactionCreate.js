@@ -62,11 +62,15 @@ module.exports = {
 				console.error(error);
 			}
 		} else if (interaction.isButton()) {
-			await interaction.deferReply({ephemeral: true});
 
-			var buttonId = interaction.customId;
+			var buttonId = parseInt(interaction.customId);
 			var ReactionRole = interaction.client.ReactionRole;
-			var role = await ReactionRole.findByPk(parseInt(buttonId));
+			if(buttonId && !isNaN(buttonId)){
+				await interaction.deferReply({ephemeral: true});
+				var role = await ReactionRole.findByPk(buttonId);
+			} else {
+				return;
+			}
 			if(role){
 				var member = interaction.member;
 				try{
@@ -100,13 +104,18 @@ module.exports = {
 					})
 				}
 			}
+			return;
 
 		} else if (interaction.isStringSelectMenu()) {
-			await interaction.deferReply({ephemeral: true});
 
-			var selectId = interaction.customId;
+			var selectId = parseInt(interaction.customId);
 			var RoleMenu = interaction.client.RoleMenu;
-			var menu = await RoleMenu.findByPk(parseInt(selectId));
+			if(selectId && !isNaN(selectId)){
+				await interaction.deferReply({ephemeral: true});
+				var menu = await RoleMenu.findByPk(parseInt(selectId));
+			} else {
+				return;
+			}
 			if(menu && interaction.values[0] != null){
 				var member = interaction.member;
 				var ReactionRole = interaction.client.ReactionRole;
@@ -158,6 +167,7 @@ module.exports = {
 					}
 				}
 			}
+			return;
 		} else {
 			return;
 		}
