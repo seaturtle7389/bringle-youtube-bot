@@ -92,7 +92,6 @@ async function fetchLatestYoutubeVideos(){
                 for(video of videoDetails){
                     var youtubeVideoId = video.id;
                     var youtubeVideoTitle = video.snippet.title;
-                    var youtubeVideoDuration = moment.duration(video.contentDetails.duration);
                     var existingYoutubeVideo = await YoutubeVideo.findOne({where: {youtube_channel_id: yt.id, youtube_id: youtubeVideoId}});
 
                     // we've already seen this video, just check to see if it's a livestream that hadn't started before
@@ -139,6 +138,7 @@ async function fetchLatestYoutubeVideos(){
                             }                            
                         // the video is an upload, confirm we have upload notifs enabled
                         } else if(upload_channel != null){
+                            var youtubeVideoDuration = moment.duration(video.contentDetails.duration);
                             // don't send notifications for Youtube Shorts (hard coded as videos 3 minutes or shorter)
                             if(youtubeVideoDuration.asSeconds() > 180){
                                 var newYoutubeVideo = await youtubeVideoHelper.createYoutubeVideo(client, 'UPLOAD', video.id, yt.id, youtubeVideoTitle, null, null)

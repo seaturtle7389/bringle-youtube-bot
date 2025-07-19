@@ -192,7 +192,7 @@ async function fetchYoutubeVideoDetails(youtubeVideoIds, maxResults, pageToken =
         }
     });
     videoIdsString = encodeURIComponent(videoIdsString)
-    url = youtubeVideoApiUrl + `part=snippet%2CliveStreamingDetails%2Cstatus&id=${videoIdsString}&maxResults=${maxResults}&key=${youtubeApiKey}`
+    url = youtubeVideoApiUrl + `part=snippet%2CliveStreamingDetails%2CcontentDetails%2Cstatus&id=${videoIdsString}&maxResults=${maxResults}&key=${youtubeApiKey}`
     response = await fetch(url);
     myJson = await response.json();
     return myJson;
