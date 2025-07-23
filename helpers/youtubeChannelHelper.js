@@ -129,6 +129,7 @@ async function fetchLatestYoutubeChannelVideos(youtubeChannelId){
 
     videoIds = [];
     response = await fetchYoutubePlaylistDetails(uploadPlaylistId, 1, null);
+    console.log(response);
     for (item of response.items){
         videoIds.push(item.contentDetails.videoId)
     };
@@ -182,7 +183,8 @@ async function fetchYoutubePlaylistDetails(playlistId, maxResults, pageToken = n
     return myJson;
 }
 
-async function fetchYoutubeVideoDetails(youtubeVideoIds, maxResults, pageToken = null){
+async function 
+fetchYoutubeVideoDetails(youtubeVideoIds, maxResults, pageToken = null){
     videoIdsString = "";
     youtubeVideoIds.forEach(function (id, i) {
         videoIdsString += id;
