@@ -51,7 +51,7 @@ module.exports = {
 				.addIntegerOption(option =>
 					option
 						.setName('yt_channel')
-						.setDescription('The YouTube channel that you with to edit the configuration for')
+						.setDescription('The YouTube channel that you wish to edit the configuration for')
 						.setRequired(true)
 						.setAutocomplete(true)
 				)
@@ -161,6 +161,8 @@ module.exports = {
 			var response = await youtubeChannelHelper.fetchYoutubeChannelsDetails(youtubeChannelIds);
 			if (response && response.items){
 				const channelDetails = response.items;
+				console.log("HERE");
+				console.log(channelDetails);
 				var index = 0;
 				var color = randomColor();
 				var channel = await youtubeChannels.find((youtubeChannel) => youtubeChannel.youtube_id == channelDetails[index].id)
@@ -177,6 +179,7 @@ module.exports = {
 						{name: 'Video check interval', value: (channel.video_check_interval != null && channel.video_check_interval > 0) ? `${channel.video_check_interval} minute(s)` : `${youtubeFetchTimeout} minute(s) [bot default]`},
 						{name: 'YouTube channel ID', value: `\`${channel.youtube_id}\``, inline: true},
 						{name: 'Upload notifications', value: channel.upload_channel_id ? `channel: <#${channel.upload_channel_id}> ${channel.upload_role_id ? `\nrole ping: <@&${channel.upload_role_id}>` : ""}` : "N/A"},
+						{name: 'Shorts upload notifications', value: channel.upload_channel_id ? `channel: <#${channel.upload_channel_id}> ${channel.short_upload_role_id ? `\nrole ping: <@&${channel.short_upload_role_id}>` : ""}` : "N/A"},
 						{name: 'Livestream notifications', value: channel.livestream_channel_id ? `channel: <#${channel.livestream_channel_id}> ${channel.livestream_role_id ? `\nrole ping: <@&${channel.livestream_role_id}>` : ""}` : "N/A"},
 					)
 					.setFooter({text: `Viewing channel ${index + 1} of ${channelDetails.length}`})
@@ -246,6 +249,7 @@ module.exports = {
 							{name: 'Video check interval', value: (updatedChannel.video_check_interval != null && updatedChannel.video_check_interval > 0) ? `${updatedChannel.video_check_interval} minute(s)` : `${youtubeFetchTimeout} minute(s) [bot default]`},
 							{name: 'YouTube channel ID', value: `\`${updatedChannel.youtube_id}\``, inline: true},
 							{name: 'Upload notification channel', value: updatedChannel.upload_channel_id ? `channel: <#${updatedChannel.upload_channel_id}> ${updatedChannel.upload_role_id ? `\nrole ping: <@&${updatedChannel.upload_role_id}>` : ""}` : "N/A"},
+							{name: 'Shorts upload notification channel', value: updatedChannel.upload_channel_id ? `channel: <#${updatedChannel.upload_channel_id}> ${updatedChannel.short_upload_role_id ? `\nrole ping: <@&${updatedChannel.short_upload_role_id}>` : ""}` : "N/A"},
 							{name: 'Livestream notification channel', value: updatedChannel.livestream_channel_id ? `channel: <#${updatedChannel.livestream_channel_id}> ${updatedChannel.livestream_role_id ? `\nrole ping: <@&${updatedChannel.livestream_role_id}>` : ""}` : "N/A"},
 						)
 						.setFooter({text: `Viewing channel ${index + 1} of ${channelDetails.length}`})

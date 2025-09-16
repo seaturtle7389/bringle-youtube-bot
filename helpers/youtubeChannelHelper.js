@@ -129,6 +129,7 @@ async function fetchLatestYoutubeChannelVideos(youtubeChannelId){
 
     videoIds = [];
     response = await fetchYoutubePlaylistDetails(uploadPlaylistId, 1, null);
+    console.log(response);
     for (item of response.items){
         videoIds.push(item.contentDetails.videoId)
     };

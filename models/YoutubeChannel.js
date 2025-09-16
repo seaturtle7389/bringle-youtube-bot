@@ -30,6 +30,8 @@ module.exports = function(sequelize, DataTypes){
         upload_channel_id: DataTypes.STRING,
         upload_announcement: DataTypes.STRING,
         upload_role_id: DataTypes.STRING,
+        short_upload_announcement: DataTypes.STRING,
+        short_upload_role_id: DataTypes.STRING,
 
         livestream_channel_id: DataTypes.STRING,
         livestream_announcement: DataTypes.STRING,
@@ -82,6 +84,11 @@ module.exports = function(sequelize, DataTypes){
         return "## {channelName} just uploaded a new video! {role}\n**{videoTitle}**\n{videoUrl}";
     }
 
+        // define the default short upload notification
+    YoutubeChannel.defaultShortUploadString = function() {
+        return "## {channelName} just uploaded a new short! {role}\n**{videoTitle}**\n{videoUrl}";
+    }
+
     // define the default livestream notification
     YoutubeChannel.defaultLivestreamString = function() {
         return "## {channelName} is live! {role}\n**{videoTitle}**\n{videoUrl}";
@@ -118,6 +125,12 @@ module.exports = function(sequelize, DataTypes){
                 ["'upload_role_id'", this.upload_role_id]]
     }
 
+    // return upload fields
+    YoutubeChannel.prototype.uploadFields = function(){
+        return [["'short_upload_announcement'", this.short_upload_announcement], 
+                ["'short_upload_role_id'", this.short_upload_role_id]]
+    }
+
     // return livestream fields
     YoutubeChannel.prototype.livestreamFields = function(){
         return [["'livestream_announcement'", this.livestream_announcement], 
@@ -141,6 +154,29 @@ module.exports = function(sequelize, DataTypes){
 
         // insert role ping into {role} placeholder
         str = str.replaceAll("{role}", this.upload_role_id == null ? "" : `<@&${this.upload_role_id}>`);
+        // insert channel name into {channelName} placeholder
+        str = str.replaceAll("{channelName}", this.name);
+        // insert video title into {videoTitle} placeholder
+        str = str.replaceAll("{videoTitle}", videoTitle);
+        // insert video url into {videoUrl} placeholder
+        str = str.replaceAll("{videoUrl}", videoUrl);
+        // insert linebreaks
+        str = str.replaceAll("{break}", "\n");
+
+        return str;
+    }
+
+    // build the short upload notification message
+    YoutubeChannel.prototype.buildShortUploadNotification = function(videoUrl, videoTitle){
+        // if the channel doesn't have a custom announcement, use the default
+        if(this.upload_announcement != null){
+            str = this.short_upload_announcement;
+        } else {
+            str = YoutubeChannel.defaultShortUploadString();
+        }
+
+        // insert role ping into {role} placeholder
+        str = str.replaceAll("{role}", this.short_upload_role_id == null ? "" : `<@&${this.short_upload_role_id}>`);
         // insert channel name into {channelName} placeholder
         str = str.replaceAll("{channelName}", this.name);
         // insert video title into {videoTitle} placeholder

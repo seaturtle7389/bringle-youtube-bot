@@ -94,6 +94,16 @@ module.exports = {
                                 .setName('notif_text')
                                 .setDescription('Custom notification text')
                         )
+                         .addRoleOption(option =>
+                            option
+                                .setName('short_notif_role')
+                                .setDescription('The role the bot will ping when posting a notification for videos 3 minutes or shorter')
+                        )
+                        .addStringOption(option =>
+                            option
+                                .setName('short_notif_text')
+                                .setDescription('Custom notification text for videos 3 minutes or shorter')
+                        )
                 ) // close notification upload set subcommand
                 .addSubcommand(subcommand =>
                     subcommand
@@ -189,12 +199,17 @@ module.exports = {
                 var notif_channel_id = notif_channel ? notif_channel.id : null;
                 var notif_role = interaction.options.getRole('notif_role');
                 var notif_role_id = notif_role ? notif_role.id : null;
+                var short_notif_role = interaction.options.getRole('short_notif_role');
+                var short_notif_role_id = short_notif_role ? short_notif_role.id : null;
                 var notif_text = interaction.options.getString('notif_text');
+                var short_notif_text = interaction.options.getString('short_notif_text');
 
                 existingYoutubeChannel = await existingYoutubeChannel.update({
                     upload_channel_id: notif_channel_id,
                     upload_role_id: notif_role_id, 
-                    upload_announcement: notif_text
+                    short_upload_role_id: short_notif_role_id,
+                    upload_announcement: notif_text,
+                    short_upload_announcement: short_notif_text
                 })
 
                 // alert that changes were saved

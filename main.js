@@ -64,6 +64,65 @@ client.login(discordToken);
 
 setInterval(fetchLatestYoutubeVideos, youtubeFetchTimeout);
 
+
+
+async function checkAllYoutubePlaylists(){
+    var youtubeChannelPlaylistIds = [];
+    var youtubeVideoIds = []
+
+    guilds = await ServerGuild.findAll();
+    for (g of guilds) {
+        var youtubeChannels = await YoutubeChannel.findAll({where: {guild_id: g.id}})
+        // TODO: make a YoutubeChannel method that checks if there's at least one valid notification set up
+            if(yt.livestream_channel_id != null || yt.upload_channel_id != null){
+                // TODO: add youtube playlist ID field to YoutubeChannel object and save it when the channel is initialized
+                // TODO: insert playlist ID into youtubeChannelPlaylistIds
+            }
+    };
+
+    // TODO: make a youtubeChannelHelper method that fetches all playlists by using the array of playlist IDs we pass in
+    // TODO: iterate over each playlist
+        // TODO: we should only be getting the latest video from the channel here assuming it works correctly
+        // store the video ID in youtubeVideoIds
+
+    // TODO: make a youtubeChannelHelper that fetches all videos by using the array of video IDs we pass in
+    var videoDetails = [];
+    // TODO: iterate over each video
+    // TODO: youtubeVideoIds is the wrong variable to use here but idk what I want to name the actual variable so it works for now
+    
+    for (v of videoDetails){
+        // TODO: get channel ID from video details
+        var channel_id = 1;
+        var youtube_video_id = 1;
+
+        var channel = await YoutubeChannel.findOne({where: {id: channel_id}});        
+
+        // if we couldn't find a channel associated with this video, no need to try to do anything else this iteration so we can call continue
+        // honestly idk how we'd hit 
+        // this issue as it stands right now but it's a safeguard I guess
+        if(channel == null) continue;
+
+        // if we do find a channel, mark that we've checked it for videos as of this time just for reference
+        channel = await channel.update({
+            last_checked: Date.now()
+        });
+
+        // check to see if we've encountered this video before
+        var existingYoutubeVideo = await YoutubeVideo.findOne({where: {youtube_channel_id: channel_id, youtube_id: youtube_video_id}});
+
+        // TODO: this video exists in the database, we should check if it's a livestream
+        // TODO: if it is a livestream, check to see if it's active
+        // TODO: if it is active, update it in the database and then make a post
+
+        // TODO: create a youtubeVideoHelper function that can determine if a video is a short, livestream, or upload
+        // TODO: allow the shorts length config to be set per-server? or per channel maybe?
+        // TODO: check to make sure that we have notifications set up for the correct video type
+        // TODO: create a video record in the database and then post about the video
+
+    }
+};
+
+
 async function fetchLatestYoutubeVideos(){
     guilds = await ServerGuild.findAll();
     for (g of guilds) {
@@ -139,7 +198,7 @@ async function fetchLatestYoutubeVideos(){
                         // the video is an upload, confirm we have upload notifs enabled
                         } else if(upload_channel != null){
                             var youtubeVideoDuration = moment.duration(video.contentDetails.duration);
-                            // don't send notifications for Youtube Shorts (hard coded as videos 3 minutes or shorter)
+                            // send different notifications for shorts (videos less than 3 minutes)
                             if(youtubeVideoDuration.asSeconds() > 180){
                                 var newYoutubeVideo = await youtubeVideoHelper.createYoutubeVideo(client, 'UPLOAD', video.id, yt.id, youtubeVideoTitle, null, null)
                                 if(newYoutubeVideo){
@@ -148,7 +207,15 @@ async function fetchLatestYoutubeVideos(){
                                 } else {
                                     console.log("Video was unable to be saved due to an unexpected error")
                                 }
-                            }   
+                            } else {
+                                var newYoutubeVideo = await youtubeVideoHelper.createYoutubeVideo(client, 'UPLOAD', video.id, yt.id, youtubeVideoTitle, null, null)
+                                if(newYoutubeVideo){
+                                    var message = yt.buildShortUploadNotification(newYoutubeVideo.getUrl(), newYoutubeVideo.title);
+                                    await upload_channel.send(message);
+                                } else {
+                                    console.log("Video was unable to be saved due to an unexpected error")
+                                }
+                            }  
                         }
                     }   
                 }
